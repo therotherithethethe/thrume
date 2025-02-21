@@ -1,0 +1,5 @@
+﻿<Solution>
+  <Project Path="Thrume.Api\Thrume.Api.csproj" Type="Classic C#" />
+  <Project Path="Thrume.Database\Thrume.Database.csproj" Type="Classic C#" />
+  <Project Path="Thrume.Domain\Thrume.Domain.csproj" Type="Classic C#" />
+</Solution>

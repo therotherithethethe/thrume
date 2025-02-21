@@ -1,0 +1,26 @@
+services:
+  thrume.api:
+    container_name: thrume.api
+    build:
+      context: .
+      dockerfile: Thrume.Api/Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - thrume.database
+    
+  thrume.database:
+    container_name: thrume.database
+    image: postgres:latest
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=thrume
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

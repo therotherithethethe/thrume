@@ -1,19 +1,18 @@
 ﻿namespace Thrume.Domain;
-public readonly record struct AccountId(Guid Id);
 
-/*public class Account
+public readonly record struct AccountId(Guid Id)
+{
+    public static implicit operator AccountId(Guid id) => new(id);
+}
+
+public class Account
 {
     public AccountId Id { get; init; }
-    public string Username { get; init; }           
-    public Email Email { get; init; }              
-    public string PasswordHash { get; init; }       
-    public AccountProfile Profile { get; init; }    
-    public Role Role { get; init; }
-    public DateTime DateCreated { get; init; }     
-    public List<Post> Posts { get; init; } 
-    public List<Message> SentMessages { get; init; }
-    public List<Message> ReceivedMessages { get; init; }
-    public List<CallSession> CallSessions { get; init; }
-}*/
+    public string Login { get; init; }
+    public int PasswordHash { get; init; }
 
-public record Email(string Value);
+    public Account(AccountId id, string login, string pass) => 
+      (Id, Login, PasswordHash) = (id, login, pass.GetHashCode()); //TODO
+
+    public static Account CreateNew(string login, string pass) => new(Guid.CreateV7(), login, pass);
+}

@@ -1,18 +1,15 @@
-﻿namespace Thrume.Domain;
+﻿using Microsoft.AspNetCore.Identity;
 
-public readonly record struct AccountId(Guid Id)
+namespace Thrume.Domain;
+
+public class Account(AccountId id, string userName, string passwordHash) : IdentityUser<AccountId>
 {
-    public static implicit operator AccountId(Guid id) => new(id);
-}
+    public override AccountId Id { get; set; } = id;
+    public override string? UserName { get; set; } = userName;
+    public override string? PasswordHash { get; set; } = BCrypt.Net.BCrypt.HashPassword(passwordHash);
+    public override string? ConcurrencyStamp { get; set; } = Guid.CreateVersion7().ToString();
 
-public class Account
-{
-    public AccountId Id { get; init; }
-    public string Login { get; init; }
-    public int PasswordHash { get; init; }
-
-    public Account(AccountId id, string login, string pass) => 
-      (Id, Login, PasswordHash) = (id, login, pass.GetHashCode()); //TODO
-
-    public static Account CreateNew(string login, string pass) => new(Guid.CreateV7(), login, pass);
+    public Account() : this(default, default, default) {} //Ef core
+    public static Account CreateNew(string login, string pass) => 
+        new(new AccountId(Guid.CreateVersion7()), login, pass);
 }

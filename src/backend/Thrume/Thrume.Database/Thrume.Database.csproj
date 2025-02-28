@@ -15,6 +15,11 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design"/>
 
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Thrume.Domain\Thrume.Domain.csproj" />
     </ItemGroup>
 </Project>

@@ -12,6 +12,12 @@
         <PackageReference Include="Microsoft.Extensions.Identity.Core"/>
         <PackageReference Include="Scalar.AspNetCore"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design"/>
+        <PackageReference Include="Microsoft.AspNetCore.Identity.UI"/>
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer"/>
+        <PackageReference Include="Google.Apis.Auth" />
+        <PackageReference Include="Google.Apis.Gmail.v1"/>
+        <PackageReference Include="MailKit"/>
+        <PackageReference Include="Microsoft.Office.Interop.Outlook"/>
     </ItemGroup>
 
     <ItemGroup>

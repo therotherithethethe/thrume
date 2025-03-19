@@ -1,28 +1,25 @@
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 using Scalar.AspNetCore;
-using Thrume.Database;
+using Thrume.Api;
 using Thrume.Domain;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddOpenApi();
-builder.Services
-    .AddIdentityApiEndpoints<Account>()
-    .AddEntityFrameworkStores<AppDbContext>();
-builder.Services.AddDbContext<AppDbContext>(o =>
-{
-    o.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
+(await builder.ConfigureEmailSender())
+    .ConfigureIdentity()
+    .ConfigureDatabase()
+    .ConfigureAuth();
 
 var app = builder.Build();
 
-app.MapOpenApi();
 
-if(app.Environment.IsDevelopment()) {
-    app.MapScalarApiReference();
-}
-
+app.MapScalarApiReference().WithMetadata(new AllowAnonymousAttribute());
+app.MapOpenApi().WithMetadata(new AllowAnonymousAttribute());
+app.UseAuthentication();
+app.UseCors();
 app.UseAuthorization();
 
+app.MapIdentityApi<Account>().WithMetadata(new AllowAnonymousAttribute());
+app.MapGet("/secure", [Authorize]() => "Secure content");
+app.MapGet("/unsecure", [AllowAnonymous]() => "Secure content");
 app.Run();
-

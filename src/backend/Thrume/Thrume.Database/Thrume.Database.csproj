@@ -16,6 +16,7 @@
         </PackageReference>
         <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design"/>
+        <PackageReference Include="EFCore.NamingConventions" />
 
     </ItemGroup>
 

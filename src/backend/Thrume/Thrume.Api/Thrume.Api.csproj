@@ -18,6 +18,8 @@
         <PackageReference Include="Google.Apis.Gmail.v1"/>
         <PackageReference Include="MailKit"/>
         <PackageReference Include="Microsoft.Office.Interop.Outlook"/>
+        <PackageReference Include="EFCore.NamingConventions" />
+        <PackageReference Include="AWSSDK.S3"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -27,8 +29,10 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Thrume.Configuration\Thrume.Configuration.csproj" />
       <ProjectReference Include="..\Thrume.Database\Thrume.Database.csproj" />
       <ProjectReference Include="..\Thrume.Domain\Thrume.Domain.csproj" />
+      <ProjectReference Include="..\Thrume.Services\Thrume.Services.csproj" />
     </ItemGroup>
 
 </Project>

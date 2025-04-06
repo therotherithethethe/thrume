@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Thrume.Database;
 
-public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
+public sealed class MyAppDesignTimeDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
 {
     public AppDbContext CreateDbContext(string[] args)
     {
@@ -16,7 +16,7 @@ public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
         var connectionString = configuration.GetConnectionString("DefaultConnection");
         var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
         optionsBuilder.UseNpgsql(connectionString);
-
+        optionsBuilder.UseSnakeCaseNamingConvention();
         return new AppDbContext(optionsBuilder.Options);
     }
 }

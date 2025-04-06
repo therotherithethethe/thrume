@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+     <PackageReference Include="Google.Apis.Auth" />
+        <PackageReference Include="Google.Apis.Gmail.v1"/>
+        <PackageReference Include="MailKit"/>
+        <PackageReference Include="Microsoft.Office.Interop.Outlook"/>
+        <PackageReference Include="Microsoft.AspNetCore.Identity.UI"/>
+        <PackageReference Include="AWSSDK.S3"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Thrume.Configuration\Thrume.Configuration.csproj" />
+    <ProjectReference Include="..\Thrume.Domain\Thrume.Domain.csproj" />
+  </ItemGroup>
+</Project>

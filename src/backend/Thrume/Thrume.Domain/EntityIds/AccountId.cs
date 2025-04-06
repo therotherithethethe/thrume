@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel;
 
-namespace Thrume.Domain;
-//[TypeConverter(typeof(AccountIdTypeConverter))]
-//TODO: try without typeconverter
+namespace Thrume.Domain.EntityIds;
+[TypeConverter(typeof(AccountIdTypeConverter))]
+//TODO: do i have another way to do this?
 public readonly record struct AccountId(Guid Value)
 {
     public override string ToString() => Value.ToString();

@@ -16,11 +16,11 @@
         </PackageReference>
         <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design"/>
-        <PackageReference Include="EFCore.NamingConventions" />
+        <PackageReference Include="EFCore.NamingConventions"/>
 
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Thrume.Domain\Thrume.Domain.csproj" />
+        <ProjectReference Include="..\Thrume.Domain\Thrume.Domain.csproj"/>
     </ItemGroup>
 </Project>

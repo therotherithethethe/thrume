@@ -14,25 +14,26 @@
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design"/>
         <PackageReference Include="Microsoft.AspNetCore.Identity.UI"/>
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer"/>
-        <PackageReference Include="Google.Apis.Auth" />
+        <PackageReference Include="Google.Apis.Auth"/>
         <PackageReference Include="Google.Apis.Gmail.v1"/>
         <PackageReference Include="MailKit"/>
         <PackageReference Include="Microsoft.Office.Interop.Outlook"/>
-        <PackageReference Include="EFCore.NamingConventions" />
+        <PackageReference Include="EFCore.NamingConventions"/>
         <PackageReference Include="AWSSDK.S3"/>
     </ItemGroup>
 
     <ItemGroup>
-      <Content Include="..\.dockerignore">
-        <Link>.dockerignore</Link>
-      </Content>
+        <Content Include="..\.dockerignore">
+            <Link>.dockerignore</Link>
+        </Content>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Thrume.Configuration\Thrume.Configuration.csproj" />
-      <ProjectReference Include="..\Thrume.Database\Thrume.Database.csproj" />
-      <ProjectReference Include="..\Thrume.Domain\Thrume.Domain.csproj" />
-      <ProjectReference Include="..\Thrume.Services\Thrume.Services.csproj" />
+        <ProjectReference Include="..\Thrume.Configuration\Thrume.Configuration.csproj"/>
+        <ProjectReference Include="..\Thrume.Database\Thrume.Database.csproj"/>
+        <ProjectReference Include="..\Thrume.Domain\Thrume.Domain.csproj"/>
+        <ProjectReference Include="..\Thrume.Infrastructure\Thrume.Infrastructure.csproj"/>
+        <ProjectReference Include="..\Thrume.Services\Thrume.Services.csproj"/>
     </ItemGroup>
 
 </Project>

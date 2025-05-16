@@ -5,11 +5,21 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>
-    
+
     <ItemGroup>
-        <PackageReference Include="Google.Apis.Auth" />
+        <PackageReference Include="Google.Apis.Auth"/>
         <PackageReference Include="Google.Apis.Gmail.v1"/>
         <PackageReference Include="MailKit"/>
         <PackageReference Include="Microsoft.AspNetCore.Identity.UI"/>
+        <PackageReference Include="AWSSDK.S3"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Thrume.Common\Thrume.Common.csproj" />
+      <ProjectReference Include="..\Thrume.Configuration\Thrume.Configuration.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Data\" />
     </ItemGroup>
 </Project>

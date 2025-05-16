@@ -3,7 +3,7 @@ using System.Globalization;
 
 namespace Thrume.Domain.EntityIds;
 
-public sealed class AccountIdTypeConverter : TypeConverter 
+public sealed class AccountIdTypeConverter : TypeConverter
 {
     public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType)
     {
@@ -17,10 +17,7 @@ public sealed class AccountIdTypeConverter : TypeConverter
         // {
         //     throw new NotSupportedException("Cannot convert an empty string to AccountId.");
         // }
-        if (Guid.TryParse(value as string, out Guid guid))
-        {
-            return new AccountId(guid);
-        }
+        if (Guid.TryParse(value as string, out var guid)) return new AccountId(guid);
         throw new NotSupportedException($"Cannot convert '{value}' to AccountId.");
     }
 }

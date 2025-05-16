@@ -22,7 +22,45 @@ namespace Thrume.Database.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<Thrume.Domain.Account.AccountId>", b =>
+            modelBuilder.Entity("AccountConversation", b =>
+                {
+                    b.Property<Guid>("ConversationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("conversation_id");
+
+                    b.Property<Guid>("ParticipantsId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("participants_id");
+
+                    b.HasKey("ConversationId", "ParticipantsId")
+                        .HasName("pk_account_conversation");
+
+                    b.HasIndex("ParticipantsId")
+                        .HasDatabaseName("ix_account_conversation_participants_id");
+
+                    b.ToTable("account_conversation", (string)null);
+                });
+
+            modelBuilder.Entity("AccountPost", b =>
+                {
+                    b.Property<Guid>("LikedById")
+                        .HasColumnType("uuid")
+                        .HasColumnName("liked_by_id");
+
+                    b.Property<Guid>("LikedPostsId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("liked_posts_id");
+
+                    b.HasKey("LikedById", "LikedPostsId")
+                        .HasName("pk_account_post_likes");
+
+                    b.HasIndex("LikedPostsId")
+                        .HasDatabaseName("ix_account_post_likes_liked_posts_id");
+
+                    b.ToTable("account_post_likes", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<Thrume.Domain.EntityIds.AccountId>", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
@@ -53,7 +91,7 @@ namespace Thrume.Database.Migrations
                     b.ToTable("AspNetRoles", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<Thrume.Domain.Account.AccountId>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<Thrume.Domain.EntityIds.AccountId>", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -83,7 +121,7 @@ namespace Thrume.Database.Migrations
                     b.ToTable("AspNetRoleClaims", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<Thrume.Domain.Account.AccountId>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<Thrume.Domain.EntityIds.AccountId>", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -113,7 +151,7 @@ namespace Thrume.Database.Migrations
                     b.ToTable("AspNetUserClaims", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<Thrume.Domain.Account.AccountId>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<Thrume.Domain.EntityIds.AccountId>", b =>
                 {
                     b.Property<string>("LoginProvider")
                         .HasColumnType("text")
@@ -140,7 +178,7 @@ namespace Thrume.Database.Migrations
                     b.ToTable("AspNetUserLogins", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<Thrume.Domain.Account.AccountId>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<Thrume.Domain.EntityIds.AccountId>", b =>
                 {
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid")
@@ -159,7 +197,7 @@ namespace Thrume.Database.Migrations
                     b.ToTable("AspNetUserRoles", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<Thrume.Domain.Account.AccountId>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<Thrume.Domain.EntityIds.AccountId>", b =>
                 {
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid")
@@ -272,6 +310,123 @@ namespace Thrume.Database.Migrations
                     b.ToTable("accounts", (string)null);
                 });
 
+            modelBuilder.Entity("Thrume.Domain.Entity.Comment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AuthorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("author_id");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("content");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("ParentCommentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("parent_comment_id");
+
+                    b.Property<Guid>("PostId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("post_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_comment_db_set");
+
+                    b.HasIndex("AuthorId")
+                        .HasDatabaseName("ix_comment_db_set_author_id");
+
+                    b.HasIndex("ParentCommentId")
+                        .HasDatabaseName("ix_comment_db_set_parent_comment_id");
+
+                    b.HasIndex("PostId")
+                        .HasDatabaseName("ix_comment_db_set_post_id");
+
+                    b.ToTable("comment_db_set", (string)null);
+                });
+
+            modelBuilder.Entity("Thrume.Domain.Entity.Conversation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_conversation_db_set");
+
+                    b.ToTable("conversation_db_set", (string)null);
+                });
+
+            modelBuilder.Entity("Thrume.Domain.Entity.Image", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("PostId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("post_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_images");
+
+                    b.HasIndex("PostId")
+                        .HasDatabaseName("ix_images_post_id");
+
+                    b.ToTable("images", (string)null);
+                });
+
+            modelBuilder.Entity("Thrume.Domain.Entity.Message", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("content");
+
+                    b.Property<Guid>("ConversationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("conversation_id");
+
+                    b.Property<Guid>("SenderId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("sender_id");
+
+                    b.Property<DateTimeOffset>("SentAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("sent_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_message_db_set");
+
+                    b.HasIndex("ConversationId")
+                        .HasDatabaseName("ix_message_db_set_conversation_id");
+
+                    b.HasIndex("SenderId")
+                        .HasDatabaseName("ix_message_db_set_sender_id");
+
+                    b.HasIndex("SentAt")
+                        .HasDatabaseName("ix_message_db_set_sent_at");
+
+                    b.ToTable("message_db_set", (string)null);
+                });
+
             modelBuilder.Entity("Thrume.Domain.Entity.Post", b =>
                 {
                     b.Property<Guid>("Id")
@@ -288,7 +443,7 @@ namespace Thrume.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<Guid>("author_id")
+                    b.Property<Guid?>("author_id")
                         .HasColumnType("uuid")
                         .HasColumnName("author_id");
 
@@ -301,9 +456,43 @@ namespace Thrume.Database.Migrations
                     b.ToTable("posts", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<Thrume.Domain.Account.AccountId>", b =>
+            modelBuilder.Entity("AccountConversation", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<Thrume.Domain.Account.AccountId>", null)
+                    b.HasOne("Thrume.Domain.Entity.Conversation", null)
+                        .WithMany()
+                        .HasForeignKey("ConversationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_account_conversation_conversation_db_set_conversation_id");
+
+                    b.HasOne("Thrume.Domain.Entity.Account", null)
+                        .WithMany()
+                        .HasForeignKey("ParticipantsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_account_conversation_accounts_participants_id");
+                });
+
+            modelBuilder.Entity("AccountPost", b =>
+                {
+                    b.HasOne("Thrume.Domain.Entity.Account", null)
+                        .WithMany()
+                        .HasForeignKey("LikedById")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_account_post_likes_accounts_liked_by_id");
+
+                    b.HasOne("Thrume.Domain.Entity.Post", null)
+                        .WithMany()
+                        .HasForeignKey("LikedPostsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_account_post_likes_posts_liked_posts_id");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<Thrume.Domain.EntityIds.AccountId>", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<Thrume.Domain.EntityIds.AccountId>", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -311,7 +500,7 @@ namespace Thrume.Database.Migrations
                         .HasConstraintName("fk_asp_net_role_claims_asp_net_roles_role_id");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<Thrume.Domain.Account.AccountId>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<Thrume.Domain.EntityIds.AccountId>", b =>
                 {
                     b.HasOne("Thrume.Domain.Entity.Account", null)
                         .WithMany()
@@ -321,7 +510,7 @@ namespace Thrume.Database.Migrations
                         .HasConstraintName("fk_asp_net_user_claims_asp_net_users_user_id");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<Thrume.Domain.Account.AccountId>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<Thrume.Domain.EntityIds.AccountId>", b =>
                 {
                     b.HasOne("Thrume.Domain.Entity.Account", null)
                         .WithMany()
@@ -331,9 +520,9 @@ namespace Thrume.Database.Migrations
                         .HasConstraintName("fk_asp_net_user_logins_asp_net_users_user_id");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<Thrume.Domain.Account.AccountId>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<Thrume.Domain.EntityIds.AccountId>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<Thrume.Domain.Account.AccountId>", null)
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<Thrume.Domain.EntityIds.AccountId>", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -348,7 +537,7 @@ namespace Thrume.Database.Migrations
                         .HasConstraintName("fk_asp_net_user_roles_asp_net_users_user_id");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<Thrume.Domain.Account.AccountId>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<Thrume.Domain.EntityIds.AccountId>", b =>
                 {
                     b.HasOne("Thrume.Domain.Entity.Account", null)
                         .WithMany()
@@ -358,13 +547,72 @@ namespace Thrume.Database.Migrations
                         .HasConstraintName("fk_asp_net_user_tokens_asp_net_users_user_id");
                 });
 
+            modelBuilder.Entity("Thrume.Domain.Entity.Comment", b =>
+                {
+                    b.HasOne("Thrume.Domain.Entity.Account", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_comment_db_set_accounts_author_id");
+
+                    b.HasOne("Thrume.Domain.Entity.Comment", "ParentComment")
+                        .WithMany("Replies")
+                        .HasForeignKey("ParentCommentId")
+                        .HasConstraintName("fk_comment_db_set_comment_db_set_parent_comment_id");
+
+                    b.HasOne("Thrume.Domain.Entity.Post", "Post")
+                        .WithMany("Comments")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_comment_db_set_posts_post_id");
+
+                    b.Navigation("Author");
+
+                    b.Navigation("ParentComment");
+
+                    b.Navigation("Post");
+                });
+
+            modelBuilder.Entity("Thrume.Domain.Entity.Image", b =>
+                {
+                    b.HasOne("Thrume.Domain.Entity.Post", "Post")
+                        .WithMany("Images")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_images_posts_post_id");
+
+                    b.Navigation("Post");
+                });
+
+            modelBuilder.Entity("Thrume.Domain.Entity.Message", b =>
+                {
+                    b.HasOne("Thrume.Domain.Entity.Conversation", "Conversation")
+                        .WithMany("Messages")
+                        .HasForeignKey("ConversationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_message_db_set_conversation_db_set_conversation_id");
+
+                    b.HasOne("Thrume.Domain.Entity.Account", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_message_db_set_accounts_sender_id");
+
+                    b.Navigation("Conversation");
+
+                    b.Navigation("Sender");
+                });
+
             modelBuilder.Entity("Thrume.Domain.Entity.Post", b =>
                 {
                     b.HasOne("Thrume.Domain.Entity.Account", "Author")
                         .WithMany("Posts")
                         .HasForeignKey("author_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
                         .HasConstraintName("fk_posts_accounts_author_id");
 
                     b.Navigation("Author");
@@ -373,6 +621,23 @@ namespace Thrume.Database.Migrations
             modelBuilder.Entity("Thrume.Domain.Entity.Account", b =>
                 {
                     b.Navigation("Posts");
+                });
+
+            modelBuilder.Entity("Thrume.Domain.Entity.Comment", b =>
+                {
+                    b.Navigation("Replies");
+                });
+
+            modelBuilder.Entity("Thrume.Domain.Entity.Conversation", b =>
+                {
+                    b.Navigation("Messages");
+                });
+
+            modelBuilder.Entity("Thrume.Domain.Entity.Post", b =>
+                {
+                    b.Navigation("Comments");
+
+                    b.Navigation("Images");
                 });
 #pragma warning restore 612, 618
         }

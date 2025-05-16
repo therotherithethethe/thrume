@@ -7,11 +7,13 @@ using Microsoft.Extensions.Logging;
 using MimeKit;
 
 namespace Thrume.Infrastructure;
+
 public sealed class IdentityEmailSender<TEntity> : IEmailSender<TEntity> where TEntity : class
 {
+    private readonly ILogger<IdentityEmailSender<TEntity>> _logger;
+
     //TODO: NOT IDEAL
     private readonly UserCredential _userCredentials;
-    private readonly ILogger<IdentityEmailSender<TEntity>> _logger;
 
     public IdentityEmailSender(ILogger<IdentityEmailSender<TEntity>> logger)
     {
@@ -59,6 +61,7 @@ public sealed class IdentityEmailSender<TEntity> : IEmailSender<TEntity> where T
     {
         throw new NotImplementedException();
     }
+
     private async Task<UserCredential> Setup(CancellationToken ct)
     {
         const string user = "wildchild250336@gmail.com";

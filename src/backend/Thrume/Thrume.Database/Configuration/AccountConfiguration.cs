@@ -13,23 +13,22 @@ public sealed class AccountConfiguration : IEntityTypeConfiguration<Account>
 
         builder.Property(a => a.Id)
             .HasConversion(
-                accId => accId.Value,        
-                guid => new AccountId(guid)  
+                accId => accId.Value,
+                guid => new AccountId(guid)
             )
             .IsRequired();
-        builder.Property(a => a.UserName)  
-            .IsRequired();                   
+        builder.Property(a => a.UserName)
+            .IsRequired();
 
-        builder.Property(a => a.Email)       
-            .IsRequired();                     
+        builder.Property(a => a.Email)
+            .IsRequired();
 
         builder.Property(a => a.EmailConfirmed)
             .HasDefaultValue(true)
-            .IsRequired();                      
+            .IsRequired();
 
         builder.HasMany(a => a.Posts).WithOne(a => a.Author).HasForeignKey("author_id");
-        
+
         builder.Property(a => a.PictureUrl).HasMaxLength(100);
-        
     }
 }

@@ -7,14 +7,10 @@ public static class ImageValidation
     private static readonly Dictionary<string, List<byte[]>> _fileSignature = new() //TODO
     {
         ["jpeg"] = [
-            [0xFF, 0xD8, 0xFF, 0xE0],
-            [0xFF, 0xD8, 0xFF, 0xE2],
-            [0xFF, 0xD8, 0xFF, 0xE3]
+            [0xFF, 0xD8],
         ],
         ["jpg"] = [
-            [0xFF, 0xD8, 0xFF, 0xE0],
-            [0xFF, 0xD8, 0xFF, 0xE2],
-            [0xFF, 0xD8, 0xFF, 0xE3]
+            [0xFF, 0xD8],
         ],
         ["png"] = [
             [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]
@@ -25,7 +21,7 @@ public static class ImageValidation
         if (string.IsNullOrEmpty(contentType) || !contentType.Contains("image"))
             return (false, DomainErrors.InvalidImageType);
         
-        var key = fileName.Split('.')[1];
+        var key = fileName.Split('.')[^1];
         if(!_fileSignature.TryGetValue(key, out var signatures))
             return (false, DomainErrors.InvalidImageType);
 

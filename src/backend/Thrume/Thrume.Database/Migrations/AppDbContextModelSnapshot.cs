@@ -456,6 +456,38 @@ namespace Thrume.Database.Migrations
                     b.ToTable("posts", (string)null);
                 });
 
+            modelBuilder.Entity("Thrume.Domain.Entity.Subscription", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("FollowerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("follower_id");
+
+                    b.Property<Guid>("FollowingId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("following_id");
+
+                    b.Property<DateTime>("SubscribedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("subscribed_at_utc");
+
+                    b.HasKey("Id")
+                        .HasName("pk_subscriptions");
+
+                    b.HasIndex("FollowingId")
+                        .HasDatabaseName("ix_subscriptions_following_id");
+
+                    b.HasIndex("FollowerId", "FollowingId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_subscriptions_follower_id_following_id");
+
+                    b.ToTable("subscriptions", (string)null);
+                });
+
             modelBuilder.Entity("AccountConversation", b =>
                 {
                     b.HasOne("Thrume.Domain.Entity.Conversation", null)
@@ -618,8 +650,33 @@ namespace Thrume.Database.Migrations
                     b.Navigation("Author");
                 });
 
+            modelBuilder.Entity("Thrume.Domain.Entity.Subscription", b =>
+                {
+                    b.HasOne("Thrume.Domain.Entity.Account", "Follower")
+                        .WithMany("Followers")
+                        .HasForeignKey("FollowerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_subscriptions_accounts_follower_id");
+
+                    b.HasOne("Thrume.Domain.Entity.Account", "FollowingAccount")
+                        .WithMany("Following")
+                        .HasForeignKey("FollowingId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_subscriptions_accounts_following_id");
+
+                    b.Navigation("Follower");
+
+                    b.Navigation("FollowingAccount");
+                });
+
             modelBuilder.Entity("Thrume.Domain.Entity.Account", b =>
                 {
+                    b.Navigation("Followers");
+
+                    b.Navigation("Following");
+
                     b.Navigation("Posts");
                 });
 

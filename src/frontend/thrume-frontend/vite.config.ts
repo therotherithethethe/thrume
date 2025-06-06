@@ -4,45 +4,17 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 import vueDevTools from 'vite-plugin-vue-devtools'
+import fs from 'fs'
 
 
 // https://vite.dev/config/
 export default defineConfig({
   server: {
     // @ts-ignore
-    //https: true,
-    proxy: {
-      '/auth/login': {
-        target: 'https://localhost:5133',
-        changeOrigin: true,
-        secure: false
-      },
-      '/auth/register': {
-        target: 'https://localhost:5133',
-        changeOrigin: true,
-        secure: false
-      },
-      '/auth/logout': {
-        target: 'https://localhost:5133',
-        changeOrigin: true,
-        secure: false
-      },
-      '/auth/manage/info': {
-        target: 'https://localhost:5133',
-        changeOrigin: true,
-        secure: false
-      },
-      '/posts': {
-        target: 'https://localhost:5133',
-        changeOrigin: true,
-        secure: false
-      },
-      '/antiforgery': {
-        target: 'https://localhost:5133',
-        changeOrigin: true,
-        secure: false
-      }
-    }
+    https: {
+      key: fs.readFileSync('localhost-key.pem'),
+      cert: fs.readFileSync('localhost.pem')
+    },
   },
   plugins: [
     vue(),

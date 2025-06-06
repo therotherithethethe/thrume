@@ -20,32 +20,40 @@ public class MessageService
     /// <summary>
     /// Finds an existing 1-on-1 conversation between two users or creates a new one.
     /// </summary>
-    public async Task<Conversation?> StartOrGetConversationAsync(AccountId user1Id, AccountId user2Id)
+    public async Task<bool> StartOrGetConversationAsync(AccountId user1Id, string userName)
     {
-        if (user1Id == user2Id)
-        {
-            return null; 
-        }
-
         var existingConversation = await _dbContext.ConversationDbSet
             .Include(c => c.Participants)
             .Where(c => c.Participants.Count == 2 &&
                         c.Participants.Any(p => p.Id == user1Id) &&
-                        c.Participants.Any(p => p.Id == user2Id))
+                        c.Participants.Any(p => p.UserName == userName))
             .FirstOrDefaultAsync();
 
         if (existingConversation != null)
         {
-            return existingConversation;
+            return false;
         }
 
-        var user1 = await _dbContext.AccountDbSet.FindAsync(user1Id);
-        var user2 = await _dbContext.AccountDbSet.FindAsync(user2Id);
+        var user1 = await
+            _dbContext
+                .AccountDbSet
+                .Include(a => a.Followers)
+                .FirstOrDefaultAsync(a => a.Id == user1Id);
+        var user2 = await
+            _dbContext
+                .AccountDbSet
+                .Include(a => a.Followers)
+                .FirstOrDefaultAsync(a => a.UserName == userName);
 
         if (user1 == null || user2 == null)
         {
-            return null; 
+            return false;
         }
+
+        if (!(user1.Followers.Any(s => s.FollowingId == user2.Id) &&
+              user2.Followers.Any(s => s.FollowingId == user1Id)))
+            return false;
+    
 
         var newConversation = new Conversation
         {
@@ -56,7 +64,7 @@ public class MessageService
         _dbContext.ConversationDbSet.Add(newConversation);
         await _dbContext.SaveChangesAsync();
 
-        return newConversation;
+        return true;
     }
 
     /// <summary>
@@ -84,6 +92,7 @@ public class MessageService
 
         var message = new Message
         {
+            Id = new MessageId(Guid.CreateVersion7()),
             ConversationId = conversationId,
             SenderId = senderId,
             Content = content,
@@ -119,7 +128,7 @@ public class MessageService
         var messages = await _dbContext.MessageDbSet
             .Where(m => m.ConversationId == conversationId)
             .Include(m => m.Sender) 
-            .OrderByDescending(m => m.SentAt)
+            .OrderBy(m => m.SentAt)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .AsNoTracking()
@@ -135,7 +144,7 @@ public class MessageService
     {
         var conversations = await _dbContext.ConversationDbSet
             .Where(c => c.Participants.Any(p => p.Id == userId))
-            .Include(c => c.Participants) 
+            .Include(c => c.Participants)
             .OrderByDescending(c => c.CreatedAt) 
             .AsNoTracking() 
             .ToListAsync();

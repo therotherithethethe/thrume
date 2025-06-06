@@ -18,6 +18,5 @@ public sealed class Comment
     public Comment? ParentComment { get; init; }
     public List<Comment> Replies { get; init; } = []; 
 
-
     public DateTimeOffset CreatedAt { get; init; } = DateTimeOffset.UtcNow;
 }

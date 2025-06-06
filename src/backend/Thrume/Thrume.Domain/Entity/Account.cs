@@ -11,4 +11,7 @@ public sealed class Account : IdentityUser<AccountId>
     public List<Post> Posts { get; init; } = [];
     public List<Post> LikedPosts { get; init; } = [];
     public string? PictureUrl { get; init; }
+    public List<Subscription> Following { get; init; } = [];
+
+    public List<Subscription> Followers { get; init; } = [];
 }

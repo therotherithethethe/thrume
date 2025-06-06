@@ -19,18 +19,23 @@ public sealed class AccountService
         _dbContext = dbContext;
         _imageRepository = imageRepository;
     }
-    public async Task UpdateAvatarAsync(AccountId accountId, IFormFile file)
+    public async Task<bool> UpdateAvatarAsync(AccountId accountId, IFormFile file)
     {
         var result = await _imageRepository.UploadFileAsync(file.OpenReadStream(), file.FileName, file.ContentType);
-        if (result.IsSuccess) 
+        if (result.IsSuccess)
+        {
             await _dbContext.AccountDbSet
                 .Where(acc => acc.Id == accountId)
-                .ExecuteUpdateAsync(setters 
+                .ExecuteUpdateAsync(setters
                     => setters.SetProperty(a => a.PictureUrl, result.Value));
+            return true;
+        }
+        else return false;
     }
 
     public async Task CreatePostsAsync(AccountId id, CreatePostRequest request)
     {
+        if (request is { Content: [], Images: [] }) return;
         if (request.Images.Count >= 10) return;
         List<string> imageLinks = new() { Capacity = request.Images.Count };
         foreach (var formFile in request.Images)
@@ -53,4 +58,67 @@ public sealed class AccountService
         account.Posts.Add(post);
         await _dbContext.SaveChangesAsync();
     }
+
+    public async Task<bool> FollowAsync(AccountId followerId, AccountId targetAccountId)
+    {
+        if (followerId.Equals(targetAccountId))
+        {
+            return false;
+        }
+        
+        var followerAccount = await _dbContext.Users.AnyAsync(u => u.Id == followerId);
+        if (!followerAccount)
+        {
+            return false; 
+        }
+
+        var targetAccountExists = await _dbContext.Users.AnyAsync(u => u.Id == targetAccountId);
+        if (!targetAccountExists)
+        {
+            return false;
+        }
+        
+        bool isAlreadyFollowing = await _dbContext.Subscriptions
+            .AnyAsync(s => s.FollowerId == followerId && s.FollowingId == targetAccountId);
+
+        if (isAlreadyFollowing)
+        {
+            return false;
+        }
+
+        var subscription = new Subscription
+        {
+            FollowerId = followerId.Value,
+            FollowingId = targetAccountId.Value,
+            SubscribedAtUtc = DateTime.UtcNow
+        };
+
+        _dbContext.Subscriptions.Add(subscription);
+        
+            await _dbContext.SaveChangesAsync();
+            return true;
+    }
+    
+    public async Task<bool> UnfollowAsync(AccountId followerId, AccountId targetAccountId)
+    {
+        if (followerId.Equals(targetAccountId))
+        {
+            return false;
+        }
+
+        var subscription = await _dbContext.Subscriptions
+            .FirstOrDefaultAsync(s => s.FollowerId == followerId && s.FollowingId == targetAccountId);
+
+        if (subscription == null)
+        {
+            return false; 
+        }
+
+        _dbContext.Subscriptions.Remove(subscription);
+
+
+            await _dbContext.SaveChangesAsync();
+            return true;
+    }
+    
 }

@@ -19,6 +19,7 @@ public sealed class PostService
     {
         var account = await _dbContext.AccountDbSet.FindAsync(accountId);
         var post = await _dbContext.PostDbSet
+            .Where(p => p.Id == postId)
                                     .Include(p => p.LikedBy)
                                     .FirstOrDefaultAsync();
 
@@ -61,9 +62,15 @@ public sealed class PostService
         
     }
 
-    public async Task<Post?> GetPostByIdAsync(PostId postId, AccountId? currentAccountId = null) =>
-        await _dbContext.PostDbSet
+    public async Task<bool> DeletePostAsync(PostId postId, AccountId accountId)
+    {
+        var post = await _dbContext.PostDbSet
             .Include(p => p.Author)
-            .Include(p => p.LikedBy)
-            .FirstOrDefaultAsync(p => p.Id == postId);
+            .Where(p => p.Id == postId && p.Author.Id == accountId)
+            .FirstOrDefaultAsync();
+        if (post is null) return false;
+        _dbContext.PostDbSet.Remove(post);
+        await _dbContext.SaveChangesAsync();
+        return true;
+    }
 }

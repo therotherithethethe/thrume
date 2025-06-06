@@ -7,7 +7,7 @@ namespace Thrume.Domain.Entity;
 
 public class Conversation
 {
-    public ConversationId Id { get; set; }
+    public ConversationId Id { get; set; } = Guid.CreateVersion7();
     public DateTimeOffset CreatedAt { get; set; }
 
 

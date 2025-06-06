@@ -44,6 +44,7 @@ internal static class BuilderExtensions
             o.Password.RequireUppercase = false;
             o.Password.RequireNonAlphanumeric = false;
             o.User.RequireUniqueEmail = true;
+            o.SignIn.RequireConfirmedEmail = true;
         });
         
         return builder;

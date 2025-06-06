@@ -19,7 +19,7 @@ public class CommentService
     public async Task CreateCommentAsync(PostId postId, AccountId authorId, string content, CommentId? parentCommentId)
     {
         
-        if (string.IsNullOrWhiteSpace(content) || content.Length > 1000) 
+        if (string.IsNullOrWhiteSpace(content) || content.Length > 200) 
         {
             return;
         }

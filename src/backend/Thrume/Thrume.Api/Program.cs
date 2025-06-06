@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Scalar.AspNetCore;
 using Thrume.Api.Extensions;
 using Thrume.Domain.Entity;
@@ -9,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,39 +40,21 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend",
         policy =>
         {
-            policy.WithOrigins("http://localhost:5173")
+            policy.WithOrigins("https://localhost:5173")
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();
         });
 });
-// builder.Services.ConfigureApplicationCookie(opts =>
-// {
-//     opts.Cookie.SameSite = SameSiteMode.None;
-//     opts.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-//     opts.Events.OnRedirectToLogin = ctx =>
-//     {
-//         if (ctx.Request.Path.StartsWithSegments("/account"))
-//             ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
-//         else
-//             ctx.Response.Redirect(ctx.RedirectUri);
-//         return Task.CompletedTask;
-//     };
-//     opts.Events.OnRedirectToAccessDenied = ctx =>
-//     {
-//         ctx.Response.StatusCode = StatusCodes.Status403Forbidden;
-//         return Task.CompletedTask;
-//     };
-// });
 
-builder.Services.AddAntiforgery(options =>
-{
-    options.HeaderName = "X-XSRF-TOKEN"; 
-    options.Cookie.Name = "MYAPP-XSRF-TOKEN"; 
-    options.Cookie.HttpOnly = false;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.Always; 
-    options.Cookie.SameSite = SameSiteMode.None;
-});
+// builder.Services.AddAntiforgery(options =>
+// {
+//     options.HeaderName = "X-XSRF-TOKEN"; 
+//     options.Cookie.Name = "MYAPP-XSRF-TOKEN"; 
+//     options.Cookie.HttpOnly = false;
+//     options.Cookie.SecurePolicy = CookieSecurePolicy.Always; 
+//     options.Cookie.SameSite = SameSiteMode.None;
+// });
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -115,7 +99,7 @@ app.MapOpenApi();
 app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
-
+//app.UseAntiforgery();
 var authGroup = app.MapGroup("/auth");
 
 
@@ -132,12 +116,17 @@ authGroup.MapPost("/logout", async (SignInManager<Account> signInManager, HttpCo
 });
 
 app.MapGroup("/auth").MapIdentityApi<Account>();
+app.MapGet("/auth/status", (ClaimsPrincipal claims) => 
+    claims.Identity?.IsAuthenticated == true 
+        ? Results.Ok(new { IsAuthenticated = true }) 
+        : Results.Ok(new { IsAuthenticated = false })
+        ).AllowAnonymous();
 
-app.MapGet("/antiforgery/token", (IAntiforgery antiforgery, HttpContext context) =>
-    {
-        var tokens = antiforgery.GetAndStoreTokens(context);
-        return Results.Ok(new { requestToken = tokens.RequestToken });
-    }).AllowAnonymous();
+// app.MapGet("/antiforgery/token", (IAntiforgery antiforgery, HttpContext context) =>
+//     {
+//         var tokens = antiforgery.GetAndStoreTokens(context);
+//         return Results.Ok(new { requestToken = tokens.RequestToken });
+//     }).AllowAnonymous().DisableAntiforgery();
 
 
 app.MapMiscEndpoints();

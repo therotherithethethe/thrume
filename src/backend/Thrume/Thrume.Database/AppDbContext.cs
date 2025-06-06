@@ -13,9 +13,10 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> dbOptions) :
     public DbSet<Account> AccountDbSet => Set<Account>();
     public DbSet<Post> PostDbSet => Set<Post>();
     public DbSet<Image> ImageDbSet => Set<Image>();
-    public DbSet<Comment> CommentDbSet => Set<Comment>(); // Added for comments
-public DbSet<Conversation> ConversationDbSet => Set<Conversation>();
+    public DbSet<Comment> CommentDbSet => Set<Comment>(); 
+    public DbSet<Conversation> ConversationDbSet => Set<Conversation>();
     public DbSet<Message> MessageDbSet => Set<Message>();
+    public DbSet<Subscription> Subscriptions => Set<Subscription>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -34,5 +35,6 @@ public DbSet<Conversation> ConversationDbSet => Set<Conversation>();
         
         builder.ApplyConfiguration(new ConversationConfiguration());
         builder.ApplyConfiguration(new MessageConfiguration());
+        builder.ApplyConfiguration(new SubscriptionConfiguration());
     }
 }

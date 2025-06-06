@@ -8,8 +8,6 @@ using Thrume.Services;
 
 namespace Thrume.Api.Endpoints;
 
-internal record CreateCommentPayload(PostId PostId, string Content, CommentId? ParentCommentId);
-
 public static class CommentEndpoints
 {
     public static IEndpointRouteBuilder MapCommentEndpoints(this IEndpointRouteBuilder app)
@@ -19,9 +17,9 @@ public static class CommentEndpoints
         commentsGroup.MapPost("/", async (
             HttpContext context,
             [FromBody] CreateCommentPayload payload,
-            CommentService commentService, IAntiforgery antiforgery) =>
+            CommentService commentService/*, IAntiforgery antiforgery*/) =>
         {
-            await antiforgery.ValidateRequestAsync(context);
+            //await antiforgery.ValidateRequestAsync(context);
             var userIdClaim = context.User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim is null || !Guid.TryParse(userIdClaim.Value, out var userIdGuid))
             {
@@ -29,7 +27,7 @@ public static class CommentEndpoints
             }
             var authorId = new AccountId(userIdGuid);
             
-            if (string.IsNullOrWhiteSpace(payload.Content) || payload.Content.Length > 1000)
+            if (string.IsNullOrWhiteSpace(payload.Content) || payload.Content.Length > 200)
             {
                 return Results.BadRequest("Comment content is invalid or too long.");
             }

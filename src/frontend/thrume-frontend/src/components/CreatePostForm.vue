@@ -1,298 +1,211 @@
 <template>
-  <div class="create-post-form">
-    <h2>Create New Post</h2>
-    <form @submit.prevent="submitPost">
-      <div class="form-group">
-        <label for="post-content">What's on your mind?</label>
-        <textarea
-          id="post-content"
-          v-model="content"
-          rows="4"
-          placeholder="Write your post content here..."
-          required
-        ></textarea>
-      </div>
-
-      <div class="form-group">
-        <label for="post-images">Add Images (Optional)</label>
-        <input
-          type="file"
-          id="post-images"
-          ref="fileInput"
-          multiple
-          accept="image/*"
-          @change="handleFilesSelected"
-        />
-        <div v-if="selectedFiles.length > 0" class="image-preview-container">
-          <p>Selected Images:</p>
-          <div class="image-previews">
-            <div v-for="(file, index) in selectedFiles" :key="index" class="image-preview">
-              <img :src="getFilePreviewUrl(file)" :alt="file.name" />
-              <span>{{ file.name }}</span>
-              <button type="button" @click="removeSelectedFile(index)" class="remove-btn">&times;</button>
-            </div>
-          </div>
+  <div class="modal-backdrop" @click.self="$emit('close')">
+    <div class="create-post-modal">
+      <button class="close-button" @click="$emit('close')">×</button>
+      <h2>Create Post</h2>
+      <textarea v-model="content" maxlength="200" placeholder="What's on your mind?"></textarea>
+      <div class="char-counter">{{ content.length }}/200</div>
+      
+      <label class="file-upload">
+        <span>Select Images</span>
+        <input type="file" multiple accept="image/*" @change="handleImageUpload">
+      </label>
+      
+      <div class="image-previews">
+        <div v-for="(image, index) in images" :key="index" class="image-preview">
+          <img :src="getImageUrl(image)" alt="Preview">
+          <button @click="removeImage(index)">×</button>
         </div>
       </div>
-
-      <div class="form-actions">
-        <button type="submit" :disabled="isSubmitting || !content.trim()">
-          {{ isSubmitting ? 'Posting...' : 'Post' }}
-        </button>
-        <button type="button" @click="cancelPost" class="cancel-btn">Cancel</button>
+      
+      <div class="actions">
+        <button @click="$emit('close')">Cancel</button>
+        <button @click="submitPost" :disabled="isSubmitting">Post</button>
       </div>
-      <div v-if="error" class="error-message">{{ error }}</div>
-    </form>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, defineEmits } from 'vue';
-import { usePostStore } from '@/stores/postStore'; // Import postStore
+import { ref } from 'vue';
+import { createPost } from '../services/postService';
+import { CreatePostRequest } from '../types';
 
 const content = ref('');
-const selectedFiles = ref<File[]>([]);
-const fileInput = ref<HTMLInputElement | null>(null);
+const images = ref<File[]>([]);
 const isSubmitting = ref(false);
-const error = ref<string | null>(null);
 
-const postStore = usePostStore(); // Initialize postStore
-
-const emit = defineEmits(['close', 'post-created']);
-
-const handleFilesSelected = (event: Event) => {
-  const target = event.target as HTMLInputElement;
-  if (target.files) {
-    // Append new files to the existing list, prevent duplicates if needed
-    const newFiles = Array.from(target.files);
-    // Basic check to avoid adding the exact same file object again if input is clicked multiple times
-    newFiles.forEach(newFile => {
-        if (!selectedFiles.value.some(existingFile => existingFile.name === newFile.name && existingFile.size === newFile.size && existingFile.lastModified === newFile.lastModified)) {
-            selectedFiles.value.push(newFile);
-        }
-    });
-    // Clear the input value so the change event fires again if the same file is selected after removal
-    if (fileInput.value) {
-        fileInput.value.value = '';
-    }
+function handleImageUpload(e: Event) {
+  const files = (e.target as HTMLInputElement).files;
+  if (files) {
+    const newImages = Array.from(files).slice(0, 10 - images.value.length);
+    images.value = [...images.value, ...newImages];
   }
-};
+}
 
-const getFilePreviewUrl = (file: File): string => {
-  // Create a temporary URL for image preview
-  return URL.createObjectURL(file);
-};
+function removeImage(index: number) {
+  images.value.splice(index, 1);
+}
 
-const removeSelectedFile = (index: number) => {
-  selectedFiles.value.splice(index, 1);
-};
-
-const submitPost = async () => {
-  if (!content.value.trim() || isSubmitting.value) {
-    return;
-  }
-
+async function submitPost() {
+    if (content.value.trim() === '' && images.value.length == 0) return;
+    
   isSubmitting.value = true;
-  error.value = null;
-
-  const formData = new FormData();
-  formData.append('content', content.value.trim()); // Assuming 'content' is the field name for text
-  selectedFiles.value.forEach((file) => {
-    formData.append('images', file); // Assuming 'images' is the field name for files
-  });
-
-  console.log('Submitting post...');
-  // Log FormData contents (for debugging, won't show files directly in console)
-  for (let [key, value] of formData.entries()) {
-    console.log(`${key}:`, value);
-  }
-
   try {
-    await postStore.createPost(formData); // Call the store action
-
-    // Reset form and emit success
+    await createPost({ content: content.value, images: images.value });
     content.value = '';
-    selectedFiles.value = [];
-    if (fileInput.value) fileInput.value.value = ''; // Clear file input
-    emit('post-created');
-    emit('close'); // Close the form/modal
-  } catch (err: any) {
-    console.error('Failed to create post:', err);
-    // The error should already be set in the store, but we can also set it locally if needed
-    // or rely on a global error display mechanism that watches store.error.
-    error.value = postStore.error || err.message || 'Failed to create post. Please try again.';
+    images.value = [];
+    emit('close');
+  } catch (error) {
+    console.error('Post creation failed:', error);
   } finally {
     isSubmitting.value = false;
   }
-};
+}
 
-const cancelPost = () => {
-  // Reset form state if needed
-  content.value = '';
-  selectedFiles.value = [];
-  error.value = null;
-  emit('close'); // Emit event to close the form/modal
-};
+function getImageUrl(image: File) {
+  return window.URL.createObjectURL(image);
+}
 
-// Clean up object URLs when component is unmounted (though less critical for short-lived previews)
-// import { onUnmounted } from 'vue';
-// onUnmounted(() => {
-//   selectedFiles.value.forEach(file => URL.revokeObjectURL(getFilePreviewUrl(file)));
-// });
+const emit = defineEmits(['close']);
 </script>
 
 <style scoped>
-.create-post-form {
-  background-color: #fff;
-  padding: 20px 30px;
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  max-width: 600px;
-  margin: 20px auto; /* Center if used as a page component */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
 }
 
-h2 {
-  text-align: center;
-  margin-bottom: 20px;
+.create-post-modal {
+  position: relative;
+  background: white;
+  padding: 30px 20px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 1000;
+  width: 500px;
+  max-width: 90%;
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
   color: #333;
 }
 
-.form-group {
-  margin-bottom: 20px;
-}
-
-label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 600;
-  color: #555;
+h2 {
+  color: #333;
+  margin-top: 0;
 }
 
 textarea {
   width: 100%;
+  height: 100px;
   padding: 10px;
-  border: 1px solid #ccc;
+  border: 1px solid #ddd;
   border-radius: 4px;
-  font-size: 1em;
-  line-height: 1.5;
-  resize: vertical; /* Allow vertical resize */
+  resize: vertical;
+  color: #333;
 }
 
-input[type="file"] {
-  display: block;
+.char-counter {
+  text-align: right;
+  font-size: 0.8rem;
+  color: #666;
   margin-top: 5px;
 }
 
-.image-preview-container {
-    margin-top: 15px;
-    padding: 10px;
-    background-color: #f9f9f9;
-    border: 1px dashed #ddd;
-    border-radius: 4px;
+.file-upload {
+  display: block;
+  margin: 15px 0;
+  padding: 8px 12px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #333;
+}
+
+.file-upload span {
+  margin-right: 10px;
+}
+
+.file-upload input[type="file"] {
+  display: none;
 }
 
 .image-previews {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 15px;
+  max-height: 200px;
+  overflow-y: auto;
 }
 
 .image-preview {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    max-width: 100px;
+  position: relative;
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
 }
 
 .image-preview img {
-    width: 80px;
-    height: 80px;
-    object-fit: cover;
-    border-radius: 4px;
-    margin-bottom: 5px;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 4px;
+  background: #f0f0f0;
 }
 
-.image-preview span {
-    font-size: 0.8em;
-    color: #555;
-    text-align: center;
-    word-break: break-all;
-    max-width: 80px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+.image-preview button {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #333;
 }
 
-.remove-btn {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background-color: rgba(255, 0, 0, 0.7);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    font-size: 1em;
-    line-height: 18px;
-    text-align: center;
-    cursor: pointer;
-    padding: 0;
-}
-.remove-btn:hover {
-    background-color: rgba(255, 0, 0, 1);
-}
-
-
-.form-actions {
+.actions {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  margin-top: 20px;
 }
 
 button {
-  padding: 10px 20px;
+  padding: 8px 16px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 1em;
-  transition: background-color 0.2s;
 }
 
-button[type="submit"] {
-  background-color: #007bff;
-  color: white;
-}
-
-button[type="submit"]:disabled {
-  background-color: #a0cfff;
+button:disabled {
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
-button[type="submit"]:hover:not(:disabled) {
-  background-color: #0056b3;
-}
-
-.cancel-btn {
-  background-color: #f8f9fa;
-  color: #333;
-  border: 1px solid #ccc;
-}
-
-.cancel-btn:hover {
-  background-color: #e2e6ea;
-}
-
-.error-message {
-  color: red;
-  margin-top: 15px;
-  text-align: center;
-  background-color: #f8d7da;
-  padding: 10px;
-  border: 1px solid #f5c6cb;
-  border-radius: 4px;
+button:last-child {
+  background-color: #3498db;
+  color: white;
 }
 </style>

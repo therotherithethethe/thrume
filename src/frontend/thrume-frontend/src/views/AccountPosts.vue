@@ -60,6 +60,7 @@ import {
 } from '../types';
 import apiClient from '../axiosInstance';
 import { useAccountStore } from '../stores/accountStore';
+import axios from 'axios';
 
 const route = useRoute();
 const accountStore = useAccountStore();
@@ -170,7 +171,7 @@ const fetchProfileData = async (name: string) => {
   profileError.value = null;
   
   try {
-    const response = await apiClient.get<ProfileData>(`/account/profile/${name}`);
+    const response = await axios.get<ProfileData>(`/account/profile/${name}`);
     const baseProfileData = response.data;
     
     // Check if the target user is following the current user

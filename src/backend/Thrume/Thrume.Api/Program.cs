@@ -4,7 +4,9 @@ using Thrume.Api.Extensions;
 using Thrume.Domain.Entity;
 using Thrume.Infrastructure;
 using Thrume.Services;
-using Thrume.Api.Endpoints; 
+using Thrume.Api.Endpoints;
+using Thrume.Api.Hubs;
+using Thrume.Api.Filters;
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Antiforgery;
@@ -23,17 +25,42 @@ builder.Services.Configure<ServiceProviderOptions>(options =>
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
+// Add Controllers
+builder.Services.AddControllers();
+
 builder.AddEmailSender()
     .AddIdentity()
     .AddDatabase()
     //.AddAuth()
     .AddMinio();
 builder.Services.AddAuthentication().AddCookie("Identity.Bearer");
+
+// SignalR Configuration
+builder.Services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = builder.Environment.IsDevelopment();
+    options.MaximumReceiveMessageSize = 32768; // 32KB max message size
+    options.StreamBufferCapacity = 10;
+    options.MaximumParallelInvocationsPerClient = 1;
+});
+
+// Register SignalR filter
+builder.Services.AddScoped<SignalRRateLimitFilter>();
+
+// Rate Limiting Configuration for SignalR (to be implemented)
+// For now, rate limiting is handled in the SignalRRateLimitFilter
+
+// Services
 builder.Services.AddScoped<IFileStorageRepository, ImageStorageRepository>();
+builder.Services.AddSingleton<IUserPresenceTracker, UserPresenceTracker>();
+builder.Services.AddSingleton<ICallStateService, CallStateService>();
 builder.Services.AddTransient<AccountService>();
 builder.Services.AddTransient<CommentService>();
 builder.Services.AddTransient<PostService>();
 builder.Services.AddTransient<MessageService>();
+
+// Background services
+builder.Services.AddHostedService<CallCleanupService>();
 
 builder.Services.AddCors(options =>
 {
@@ -43,7 +70,8 @@ builder.Services.AddCors(options =>
             policy.WithOrigins("https://localhost:5173")
                 .AllowAnyHeader()
                 .AllowAnyMethod()
-                .AllowCredentials();
+                .AllowCredentials()
+                .SetIsOriginAllowed(_ => true); // Required for SignalR
         });
 });
 
@@ -134,6 +162,13 @@ app.MapPostEndpoints();
 app.MapAccountEndpoints();
 app.MapCommentEndpoints();
 app.MapMessageEndpoints();
+
+// Map Call Controller
+app.MapControllers();
+
+// SignalR Hub mapping
+app.MapHub<ChatHub>("/chathub");
+
 app.MapGet("/", () => Results.Redirect("/scalar"));
 app.Run();
 

@@ -1,14 +1,19 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { getConversations, deleteConversation } from '../services/messageService';
 import { Conversation, Participant } from '../types';
 import { useAccountStore } from '../stores/accountStore';
+import { useMessageStore } from '../stores/messageStore';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal.vue';
+import ConnectionStatus from '../components/ConnectionStatus.vue';
+import OnlineUsersList from '../components/OnlineUsersList.vue';
+import signalRService from '../services/signalRService';
 
 const router = useRouter();
 const route = useRoute();
 const accountStore = useAccountStore();
+const messageStore = useMessageStore();
 const conversations = ref<Conversation[]>([]);
 
 // State for deletion functionality
@@ -18,10 +23,20 @@ const isDeletingConversation = ref(false);
 
 onMounted(async () => {
   try {
-    conversations.value = await getConversations();
+    // Initialize SignalR connection
+    await messageStore.initializeSignalR();
+    
+    // Fetch conversations using the store
+    await messageStore.fetchConversations();
+    conversations.value = messageStore.conversations;
   } catch (error) {
     console.error('Failed to fetch conversations:', error);
   }
+});
+
+onBeforeUnmount(() => {
+  // Clean up SignalR connections
+  messageStore.cleanupSignalR();
 });
 
 function getOtherParticipant(participants: Participant[]) {
@@ -82,7 +97,14 @@ function handleDeleteSuccess() {
 
 <template>
   <div class="messages-view">
-    <h1>Your Conversations</h1>
+    <div class="header">
+      <h1>Your Conversations</h1>
+      <ConnectionStatus />
+    </div>
+    
+    <div class="sidebar-content">
+      <OnlineUsersList v-if="messageStore.onlineUsers.length > 0" />
+    </div>
     
     <div v-if="conversations.length === 0" class="empty-state">
       No conversations found
@@ -132,6 +154,21 @@ function handleDeleteSuccess() {
 <style scoped>
 .messages-view {
   padding: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.header h1 {
+  margin: 0;
+}
+
+.sidebar-content {
+  margin-bottom: 20px;
 }
 
 .conversation-card {

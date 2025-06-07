@@ -32,3 +32,19 @@ export default {
     }
   }
 }
+
+export async function searchUsers(
+  userName: string,
+  page: number = 1,
+  pageSize: number = 10
+): Promise<FollowerFollowingUser[]> {
+  try {
+    const response = await apiClient.get(`/account/search/${userName}`, {
+      params: { page, pageSize }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error searching users:', error);
+    throw error;
+  }
+}

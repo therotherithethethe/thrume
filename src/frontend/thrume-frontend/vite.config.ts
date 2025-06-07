@@ -15,6 +15,19 @@ export default defineConfig({
       key: fs.readFileSync('localhost-key.pem'),
       cert: fs.readFileSync('localhost.pem')
     },
+    proxy: {
+      '/chathub': {
+        target: 'https://localhost:5133',
+        changeOrigin: true,
+        secure: false,
+        ws: true, // Enable WebSocket proxying for SignalR
+      },
+      '/': {
+        target: 'https://localhost:5133',
+        changeOrigin: true,
+        secure: false,
+      }
+    }
   },
   plugins: [
     vue(),

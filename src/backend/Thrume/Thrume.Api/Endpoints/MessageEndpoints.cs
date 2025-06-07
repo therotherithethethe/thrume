@@ -2,12 +2,14 @@ using System.Security.Claims;
 
 using Microsoft.AspNetCore.Mvc;
 using Thrume.Domain.EntityIds;
-using Thrume.Services; 
+using Thrume.Services;
 
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Thrume.Database;
+using Microsoft.AspNetCore.SignalR;
+using Thrume.Api.Hubs;
 
 namespace Thrume.Api.Endpoints;
 
@@ -124,7 +126,9 @@ public static class MessageEndpoints
         messagesGroup.MapPost("/conversations/", async (
             HttpContext context,
             [FromBody] SendMessagePayload payload,
-            MessageService messageService/*, IAntiforgery antiforgery*/) =>
+            MessageService messageService,
+            IHubContext<ChatHub> hubContext,
+            AppDbContext dbContext/*, IAntiforgery antiforgery*/) =>
         {
             //await antiforgery.ValidateRequestAsync(context);
             var userId = GetCurrentUserId(context);
@@ -134,10 +138,46 @@ public static class MessageEndpoints
 
             if (message == null)
             {
-
                 return Results.BadRequest("Unable to send message.");
             }
 
+            try
+            {
+                // Get sender information for SignalR broadcast
+                var sender = await dbContext.AccountDbSet
+                    .Where(a => a.Id == userId.Value)
+                    .Select(a => new { a.Id, a.UserName, a.PictureUrl })
+                    .FirstOrDefaultAsync();
+
+                var logger = context.RequestServices.GetRequiredService<ILogger<object>>();
+                logger.LogInformation("Attempting SignalR broadcast for message {MessageId} to group conversation_{ConversationId}",
+                    message.Id, payload.Id.Value);
+
+                // Broadcast message to conversation group via SignalR
+                var signalRMessage = new
+                {
+                    message.Id,
+                    message.ConversationId,
+                    message.SenderId,
+                    SenderUserName = sender?.UserName,
+                    SenderPictureUrl = sender?.PictureUrl,
+                    message.Content,
+                    message.SentAt
+                };
+
+                await hubContext.Clients.Group($"conversation_{payload.Id.Value}")
+                    .SendAsync("ReceiveMessage", signalRMessage);
+                    
+                logger.LogInformation("Successfully broadcasted message {MessageId} via SignalR to group conversation_{ConversationId}",
+                    message.Id, payload.Id.Value);
+            }
+            catch (Exception ex)
+            {
+                // Log the error but don't fail the message send
+                // The message was saved successfully, SignalR broadcast is best-effort
+                var logger = context.RequestServices.GetRequiredService<ILogger<object>>();
+                logger.LogError(ex, "Failed to broadcast message {MessageId} via SignalR", message.Id);
+            }
 
             var response = new MessageResponse(message.Id, message.ConversationId, message.SenderId, message.Content, message.SentAt);
             return Results.Ok(response);

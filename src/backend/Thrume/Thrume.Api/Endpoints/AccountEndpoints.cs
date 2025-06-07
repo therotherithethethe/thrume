@@ -14,6 +14,26 @@ public static class AccountEndpoints
     public static IEndpointRouteBuilder MapAccountEndpoints(this IEndpointRouteBuilder app)
     {
         var accountGroup = app.MapGroup("/account").RequireAuthorization();
+
+        accountGroup.MapGet("/search/{userName}", async (string userName, AppDbContext dbContext,
+            [FromQuery]int page,
+            [FromQuery]int pageSize) =>
+        {
+            var accounts = await 
+                dbContext
+                    .AccountDbSet
+                    .Where(a => a.UserName!.Contains(userName) && a.EmailConfirmed)
+                    .Skip((page - 1)*pageSize)
+                    .Take(pageSize)
+                    .Select(a => new
+                    {
+                        a.UserName,
+                        a.PictureUrl
+                    })
+                    .AsNoTracking()
+                    .ToListAsync();
+            return Results.Ok(accounts);
+        });
         
         accountGroup.MapGet("/following/{userName}", async (ClaimsPrincipal claimsPrincipal, AppDbContext dbContext, string userName) =>
         {

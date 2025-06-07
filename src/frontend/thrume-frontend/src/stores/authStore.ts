@@ -17,8 +17,22 @@ export const useAuthStore = defineStore('Auth', () => {
         } catch (e) {
             currentUser.value.isAuthenticated = false
         }
-        console.log(`user is authed ${currentUser.value.isAuthenticated}`)
+        
         return currentUser.value.isAuthenticated
     }
-    return {currentUser, checkAuth}
+
+    const checkAuthSync = (): boolean => {
+        try {
+            apiClient.get<AuthStatusResponse>('auth/status').then(resp => {
+                currentUser.value.isAuthenticated = resp.data?.isAuthenticated;
+            }).catch(e => {
+                currentUser.value.isAuthenticated = false
+            });
+        } catch (e) {
+            currentUser.value.isAuthenticated = false
+        }
+        
+        return currentUser.value.isAuthenticated
+    }
+    return {currentUser, checkAuth, checkAuthSync}
 })

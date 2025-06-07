@@ -19,7 +19,7 @@ async function fetchAndStoreCurrentAccount() {
     const accountResponse = await apiClient.get<RawAccountFromApi>('account/me');
     if (accountResponse.status === 200 && accountResponse.data) {
       accountStore.setAccount(accountResponse.data);
-      console.log('Account data stored:', accountStore.currentAccount);
+      
       return true;
     } else {
       console.warn('Failed to fetch account/me data:', accountResponse);

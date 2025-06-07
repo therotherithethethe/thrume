@@ -1,14 +1,20 @@
 <!-- App.vue -->
 <script setup lang="ts">
 import TheSidebar from './components/Sidebar.vue'; // Import the new sidebar component
+import ConnectionStatus from './components/ConnectionStatus.vue'; // Import connection status
+import IncomingCallModal from './components/IncomingCallModal.vue'; // Import incoming call modal
 import { onMounted } from 'vue';
 import { useAuthStore } from './stores/authStore';
 import { useAccountStore } from './stores/accountStore';
+import { useMessageStore } from './stores/messageStore'; // Import message store
+import { useCallStore } from './stores/callStore'; // Import call store
 import { RawAccountFromApi } from './types'; // Import for typing
 import apiClient from './axiosInstance'; // Assuming apiClient is defined
 
 const authStore = useAuthStore();
 const accountStore = useAccountStore();
+const messageStore = useMessageStore(); // Initialize message store
+const callStore = useCallStore(); // Initialize call store
 
 // Helper to fetch and store current user's account data
 async function fetchAndStoreCurrentAccount() {
@@ -35,6 +41,13 @@ onMounted(async () => {
   const isAuthenticated = await authStore.checkAuth();
   if (isAuthenticated) {
     await fetchAndStoreCurrentAccount();
+    
+    // Initialize SignalR if user is authenticated
+    try {
+      await messageStore.initializeSignalR();
+    } catch (error) {
+      console.warn('SignalR initialization failed, using REST API fallback:', error);
+    }
   } else {
     accountStore.clearAccount(); // Ensure account is cleared if not authenticated
   }
@@ -43,6 +56,12 @@ onMounted(async () => {
 
 <template>
   <div id="app-layout">
+    <!-- Global Connection Status (only shown when there are connection issues) -->
+    <ConnectionStatus v-if="authStore.checkAuthSync()" />
+    
+    <!-- Incoming Call Modal (global overlay) -->
+    <IncomingCallModal v-if="authStore.checkAuthSync()" />
+    
     <TheSidebar />
     <main class="main-content">
       <router-view /> <!-- This is where your route components (Home, AccountPosts, Auth) will render -->

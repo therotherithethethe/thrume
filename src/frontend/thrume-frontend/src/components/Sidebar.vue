@@ -68,9 +68,12 @@ const logout = async () => {
         <li v-if="isLoggedIn"><p @click="navigateToProfile" class="nav-link">Profile</p></li>
         <li v-if="isLoggedIn"><p @click="navigateToMessages" class="nav-link">Messages</p></li>
         <li v-if="isLoggedIn"><p @click="openCreatePostModal" class="nav-link">Create Post</p></li>
+        <li v-if="isLoggedIn"><input type="button" value="Search" @click="router.push('/search/ ')"></li>
+
         <li v-if="isLoggedIn"><input type="button" value="Logout" @click="logout"></li>
         <!-- Show login button if not logged in -->
-        <li v-else><p @click="router.push({name: 'Auth'})" class="nav-link">Login</p></li>
+        <li v-if="!isLoggedIn"><p @click="router.push({name: 'Auth'})" class="nav-link">Login</p></li>
+        <li v-if="!isLoggedIn"><p @click="router.push({name: 'Register'})" class="nav-link">Register</p></li>
       </ul>
     </nav>
     <CreatePostForm v-if="showCreatePostModal" @close="showCreatePostModal = false" />

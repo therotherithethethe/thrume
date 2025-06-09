@@ -1,0 +1,43 @@
+# 2. Сервіси (Backend та Frontend)
+services:
+  # --- Backend: ASP.NET Core API ---
+  - type: web
+    name: thrume-api
+    plan: free # або starter
+    env: docker # Вказуємо, що розгортаємо за допомогою Dockerfile
+
+    # Шлях до директорії бекенду відносно кореня репозиторію
+    rootDir: src/backend/Thrume
+
+    # Інструкції для Docker
+    dockerfilePath: ./Dockerfile # Шлях до Dockerfile відносно rootDir
+
+    # Оптимізація: перебудовувати лише при змінах у папці бекенду
+    buildFilter:
+      paths:
+        - src/backend/**
+  # --- Frontend: Vue.js Static Site ---
+  - type: static
+    name: thrume-frontend
+    plan: free
+
+    # Шлях до директорії фронтенду відносно кореня репозиторію
+    rootDir: src/frontend/thrume-frontend
+
+    # Команда для встановлення залежностей та збірки проєкту
+    buildCommand: pnpm install && pnpm build
+
+    # Директорія, куди Vite складає готові файли
+    publishDir: dist
+
+    # Оптимізація: перебудовувати лише при змінах у папці фронтенду
+    buildFilter:
+      paths:
+        - src/frontend/**
+
+    # Правила переадресації для Single Page Application (SPA)
+    # Всі запити, що не знаходять файлу, перенаправляються на index.html
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

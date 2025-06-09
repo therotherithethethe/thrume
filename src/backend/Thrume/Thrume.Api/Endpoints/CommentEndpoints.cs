@@ -12,7 +12,7 @@ public static class CommentEndpoints
 {
     public static IEndpointRouteBuilder MapCommentEndpoints(this IEndpointRouteBuilder app)
     {
-        var commentsGroup = app.MapGroup("/comments").RequireAuthorization();
+        var commentsGroup = app.MapGroup("/api/comments").RequireAuthorization();
         
         commentsGroup.MapPost("/", async (
             HttpContext context,
@@ -34,7 +34,7 @@ public static class CommentEndpoints
             await commentService.CreateCommentAsync(payload.PostId, authorId, payload.Content, payload.ParentCommentId);
 
             return Results.Ok(); 
-        });
+        }).RequireAuthorization("StandardAccess");
         
         commentsGroup.MapDelete("/", async (
             HttpContext context,
@@ -53,7 +53,7 @@ public static class CommentEndpoints
 
 
             return Results.NoContent();
-        });
+        }).RequireAuthorization("StandardAccess");
 
         return app;
     }

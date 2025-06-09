@@ -7,7 +7,7 @@ public static class MiscEndpoints
 {
     public static IEndpointRouteBuilder MapMiscEndpoints(this IEndpointRouteBuilder app)
     {
-        var mapGroup = app.MapGroup("/test");
+        var mapGroup = app.MapGroup("/api/test");
 
         // GET /exception
         mapGroup.MapGet("/exception", () => { throw new InvalidOperationException("Sample Exception"); });

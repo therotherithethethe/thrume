@@ -7,14 +7,14 @@ export interface FollowerFollowingUser {
 
 export default {
   uploadAvatar(formData: FormData) {
-    return apiClient.put('/account/updateProfile', formData, {
+    return apiClient.put('/api/account/updateProfile', formData, {
       headers: {'Content-Type': 'multipart/form-data'}
     });
   },
 
   async getFollowers(userName: string): Promise<FollowerFollowingUser[]> {
     try {
-      const response = await apiClient.get(`/account/followers/${userName}`);
+      const response = await apiClient.get(`/api/account/followers/${userName}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching followers:', error);
@@ -24,7 +24,7 @@ export default {
 
   async getFollowing(userName: string): Promise<FollowerFollowingUser[]> {
     try {
-      const response = await apiClient.get(`/account/following/${userName}`);
+      const response = await apiClient.get(`/api/account/following/${userName}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching following:', error);
@@ -39,7 +39,7 @@ export async function searchUsers(
   pageSize: number = 10
 ): Promise<FollowerFollowingUser[]> {
   try {
-    const response = await apiClient.get(`/account/search/${userName}`, {
+    const response = await apiClient.get(`/api/account/search/${userName}`, {
       params: { page, pageSize }
     });
     return response.data;

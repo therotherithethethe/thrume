@@ -119,7 +119,7 @@ const fetchRecentPosts = async () => {
   error.value = null;
 
   try {
-    const response = await apiClient.get<RawPostFromApi[]>('/account/posts/recent', {
+    const response = await apiClient.get<RawPostFromApi[]>('/api/account/posts/recent', {
       params: {
         offset: offset.value,
         limit: limit.value

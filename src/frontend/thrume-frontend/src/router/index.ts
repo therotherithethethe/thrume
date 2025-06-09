@@ -6,6 +6,8 @@ import MessagesView from "../views/MessagesView.vue"
 import ConversationViewEnhanced from "../views/ConversationViewEnhanced.vue"
 import AccountSearch from "../views/AccountSearch.vue"
 import Register from "../views/Register.vue"
+import AdminPanel from "../views/AdminPanel.vue"
+import VoiceComponent from "../views/VoiceComponent.vue"
 
 const routes: Array<RouteRecordRaw> = [
     {
@@ -42,6 +44,14 @@ const routes: Array<RouteRecordRaw> = [
     {
         path: '/search/:name',
         component: AccountSearch
+    },
+    {
+        path: '/admin/panel',
+        component: AdminPanel
+    },
+    {
+        path: '/voice/call',
+        component: VoiceComponent
     }
     
 ]

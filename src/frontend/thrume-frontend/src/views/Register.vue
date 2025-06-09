@@ -34,7 +34,7 @@ function triggerPopup(message: string, type: 'success' | 'error' = 'error') {
 
 async function fetchAndStoreCurrentAccount() {
   try {
-    const accountResponse = await apiClient.get<RawAccountFromApi>('account/me');
+    const accountResponse = await apiClient.get<RawAccountFromApi>('/api/account/me');
     if (accountResponse.status === 200 && accountResponse.data) {
       accountStore.setAccount(accountResponse.data);
       return true;
@@ -54,7 +54,7 @@ async function handleRegister() {
   isLoading.value = true;
   
   try {
-    const registerResponse = await apiClient.post('auth/register', {
+    const registerResponse = await apiClient.post('/api/auth/register', {
       email: email.value,
       password: password.value,
     });

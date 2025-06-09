@@ -11,6 +11,7 @@ export const useAccountStore = defineStore('account', () => {
   const currentAccount = ref<Account | null>(null);
   const loading = ref(false); // For loading `currentAccount`
   const error = ref<string | null>(null); // For `currentAccount` errors
+  const roles = ref<string[]>([]); // Added for role storage
 
   // Getters: Use computed for derived state
   const isLoggedIn = computed(() => !!currentAccount.value);
@@ -44,6 +45,22 @@ export const useAccountStore = defineStore('account', () => {
     } catch (err: any) {
       console.error('Failed to update profile picture:', err);
       throw err;
+    }
+  };
+
+  // Fetches roles for the current account
+  const fetchRoles = async () => {
+    try {
+      const response = await apiClient.get<string[]>('/api/account/role');
+      // If the response data is an array and non-empty, set roles to it, else set to ['User']
+      if (Array.isArray(response.data) && response.data.length > 0) {
+        roles.value = response.data;
+      } else {
+        roles.value = ['User'];
+      }
+    } catch (err) {
+      console.error('Failed to fetch roles:', err);
+      roles.value = ['User'];
     }
   };
 
@@ -89,7 +106,7 @@ export const useAccountStore = defineStore('account', () => {
     currentAccount.value = null; // Clear existing account while loading
 
     try {
-      const response = await apiClient.get<RawAccountFromApi>(`/accounts/${id}`);
+      const response = await apiClient.get<RawAccountFromApi>(`/api/accounts/${id}`);
       setAccount(response.data); // Call local action
     } catch (err: any) {
       console.error('Failed to fetch current account:', err);
@@ -111,7 +128,7 @@ export const useAccountStore = defineStore('account', () => {
     currentAccount.value = null;
 
     try {
-      const response = await apiClient.get<RawAccountFromApi>(`/accounts/username/${usernameParam}`);
+      const response = await apiClient.get<RawAccountFromApi>(`/api/accounts/username/${usernameParam}`);
       setAccount(response.data);
     } catch (err: any) {
       console.error('Failed to fetch account by username:', err);
@@ -138,5 +155,7 @@ export const useAccountStore = defineStore('account', () => {
     fetchAccountById,
     fetchAccountByUsername,
     updateProfilePicture,
+    fetchRoles,
+    roles,
   };
 });

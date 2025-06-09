@@ -7,4 +7,6 @@ public class MinioConfiguration
     public string SecretKey { get; init; } = null!;
     public string BucketName { get; init; } = null!;
     public bool UseSsl { get; init; }
+
+    public override string ToString() => $"{ServiceUrl} {AccessKey} {SecretKey}, {BucketName}";
 }

@@ -7,6 +7,20 @@ import { computed, ref } from 'vue';
 import apiClient from '../axiosInstance';
 import CreatePostForm from './CreatePostForm.vue';
 
+// Import the icons we'll be using
+import {
+  Home,
+  User,
+  MessageSquare,
+  PlusSquare,
+  Search,
+  Shield,
+  LogIn,
+  LogOut,
+  UserPlus,
+  Voicemail
+} from 'lucide-vue-next';
+
 const router = useRouter();
 const authStore = useAuthStore();
 const accountStore = useAccountStore();
@@ -15,29 +29,7 @@ const showCreatePostModal = ref(false);
 // Computed properties to reactively get user info and login status
 const currentUsername = computed(() => accountStore.accountUsername);
 const isLoggedIn = computed(() => authStore.currentUser.isAuthenticated);
-
-// Navigation functions
-const navigateToHome = () => {
-  router.push({ name: 'Home' });
-};
-
-const navigateToProfile = () => {
-  if (isLoggedIn.value && currentUsername.value !== 'Guest') {
-    router.push({ path: `/${currentUsername.value}` }); // Use the username from the store
-  } else {
-    alert('Please log in to view your profile.');
-    router.push({ name: 'Auth' });
-  }
-};
-
-const navigateToMessages = () => {
-  if (isLoggedIn.value) {
-    router.push({ name: 'Messages' });
-  } else {
-    alert('Please log in to view messages.');
-    router.push({ name: 'Auth' });
-  }
-};
+const isAdmin = computed(() => accountStore.roles.includes('Admin'));
 
 const openCreatePostModal = () => {
   showCreatePostModal.value = true;
@@ -45,10 +37,10 @@ const openCreatePostModal = () => {
 
 const logout = async () => {
   try {
-    await apiClient.post('/auth/logout');
-    authStore.currentUser.isAuthenticated = false; // Update auth status
-    accountStore.clearAccount(); // Clear account data on logout
-    router.push({ name: 'Auth' }); // Redirect to auth page
+    await apiClient.post('/api/auth/logout');
+    authStore.currentUser.isAuthenticated = false;
+    accountStore.clearAccount();
+    router.push({ name: 'Auth' });
   } catch (error) {
     console.error('Error during logout:', error);
     alert('Logout failed. Please try again.');
@@ -58,91 +50,182 @@ const logout = async () => {
 
 <template>
   <aside class="sidebar">
-    <div class="sidebar-header">
-      <h3>Thrume</h3>
-    </div>
-    <nav class="sidebar-nav">
-      <ul>
-        <li><p @click="navigateToHome" class="nav-link">Home</p></li>
-        <!-- Only show profile/messages/logout if logged in -->
-        <li v-if="isLoggedIn"><p @click="navigateToProfile" class="nav-link">Profile</p></li>
-        <li v-if="isLoggedIn"><p @click="navigateToMessages" class="nav-link">Messages</p></li>
-        <li v-if="isLoggedIn"><p @click="openCreatePostModal" class="nav-link">Create Post</p></li>
-        <li v-if="isLoggedIn"><input type="button" value="Search" @click="router.push('/search/ ')"></li>
+    <div class="sidebar-content">
+      <div class="sidebar-header">
+        <h3>Thrume</h3>
+      </div>
 
-        <li v-if="isLoggedIn"><input type="button" value="Logout" @click="logout"></li>
-        <!-- Show login button if not logged in -->
-        <li v-if="!isLoggedIn"><p @click="router.push({name: 'Auth'})" class="nav-link">Login</p></li>
-        <li v-if="!isLoggedIn"><p @click="router.push({name: 'Register'})" class="nav-link">Register</p></li>
-      </ul>
-    </nav>
+      <!-- Main Navigation -->
+      <nav class="sidebar-nav">
+        <!-- Using <router-link> is the standard Vue way for navigation -->
+        <router-link :to="{ name: 'Home' }" class="nav-item">
+          <Home :size="20" />
+          <span>Home</span>
+        </router-link>
+
+        <router-link v-if="isLoggedIn" :to="`/${currentUsername}`" class="nav-item">
+          <User :size="20" />
+          <span>Profile</span>
+        </router-link>
+
+        <router-link v-if="isLoggedIn" :to="{ name: 'Messages' }" class="nav-item">
+          <MessageSquare :size="20" />
+          <span>Messages</span>
+        </router-link>
+
+        <router-link v-if="isLoggedIn" :to="'/search/'" class="nav-item">
+          <Search :size="20" />
+          <span>Search</span>
+        </router-link>
+
+        <button v-if="isLoggedIn" @click="openCreatePostModal" class="nav-item logout-btn">
+          <PlusSquare :size="20" />
+          <span>Create Post</span>
+        </button>
+
+        <router-link v-if="isAdmin" :to="'/admin/panel'" class="nav-item">
+          <Shield :size="20" />
+          <span>Admin</span>
+        </router-link>
+
+        <router-link v-if="isLoggedIn" :to="'/voice/call'" class="nav-item">
+          <Voicemail :size="20" />
+          <span>Voice</span>
+        </router-link>
+
+        <!-- Links for logged-out users -->
+        <router-link v-if="!isLoggedIn" :to="{ name: 'Auth' }" class="nav-item">
+          <LogIn :size="20" />
+          <span>Login</span>
+        </router-link>
+        <router-link v-if="!isLoggedIn" :to="{ name: 'Register' }" class="nav-item">
+          <UserPlus :size="20" />
+          <span>Register</span>
+        </router-link>
+        
+        <button v-if="isLoggedIn" @click="openCreatePostModal" class="nav-item logout-btn">
+          <PlusSquare :size="20" />
+          <span>Create Post</span>
+        </button>
+        <button v-if="isLoggedIn" @click="logout" class="nav-item logout-btn">
+          <LogOut :size="20" />
+          <span>Logout</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- The Create Post Modal remains the same -->
     <CreatePostForm v-if="showCreatePostModal" @close="showCreatePostModal = false" />
   </aside>
 </template>
 
 <style scoped>
+/* Using CSS Variables for easier theme management */
+:root {
+  --sidebar-bg-color: #1a1d24;
+  --sidebar-text-color: #adb5bd;
+  --sidebar-accent-color: #3498db;
+  --sidebar-hover-bg-color: #2c3e50;
+  --sidebar-active-bg-color: #34495e;
+  --sidebar-active-text-color: #ffffff;
+  --brand-color: #3498db;
+  --logout-bg-color: #e74c3c;
+  --logout-hover-bg-color: #c0392b;
+}
+
 .sidebar {
-  width: 200px; /* Fixed width sidebar */
-  background-color: #2c3e50; /* Darker background */
-  color: #ecf0f1; /* Light text */
-  padding: 20px;
-  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-  min-height: 100vh; /* Full height */
+  width: 250px; /* A bit wider for icons and text */
+  background-color: var(--sidebar-bg-color);
+  color: var(--sidebar-text-color);
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  flex-shrink: 0; /* Prevent sidebar from shrinking */
+  flex-shrink: 0;
+  padding: 1.5rem 1rem;
+  box-shadow: 4px 0 15px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* Make this container take full height */
 }
 
 .sidebar-header {
-  margin-bottom: 20px;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-  padding-bottom: 10px;
+  margin-bottom: 2rem;
+  padding-left: 0.75rem;
 }
 
 .sidebar-header h3 {
   margin: 0;
-  font-size: 1.5em;
-  color: #3498db; /* A blue accent */
+  font-size: 1.8em;
+  font-weight: 700;
+  color: var(--brand-color);
+  cursor: default; /* It's a brand, not a link */
 }
 
-.sidebar-nav ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* Space between nav items */
 }
 
-.sidebar-nav li {
-  margin-bottom: 15px;
-}
-
-.nav-link,
-.sidebar-nav input[type="button"] {
-  display: block;
-  width: 100%;
-  padding: 10px 15px;
-  border-radius: 5px;
-  text-align: left;
-  font-size: 1.1em;
-  color: #ecf0f1;
+/* This is the new unified style for all navigation items (<router-link> and <button>) */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem; /* Space between icon and text */
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  text-decoration: none; /* Removes underline from links */
+  color: var(--sidebar-text-color);
   background-color: transparent;
   border: none;
+  width: 100%;
   cursor: pointer;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-.nav-link:hover,
-.sidebar-nav input[type="button"]:hover {
-  background-color: #34495e; /* Slightly lighter dark */
-  color: #ffffff;
+.nav-item:hover {
+  background-color: var(--sidebar-hover-bg-color);
+  color: var(--sidebar-active-text-color);
 }
 
-.sidebar-nav input[type="button"] {
-  background-color: #e74c3c; /* Red for logout */
+/* This is the key for showing the active page! */
+.nav-item.router-link-exact-active {
+  background-color: var(--sidebar-active-bg-color);
+  color: var(--sidebar-active-text-color);
+  font-weight: 600;
+}
+
+/* This pushes the actions to the bottom */
+.sidebar-actions {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* Space between buttons */
+  padding-top: 1rem; /* Add some space from the nav above */
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.create-post-btn {
+  background-color: var(--sidebar-accent-color);
   color: white;
-  margin-top: 10px;
+}
+.create-post-btn:hover {
+  background-color: #2980b9; /* Darker blue */
 }
 
-.sidebar-nav input[type="button"]:hover {
-  background-color: #c0392b;
+.logout-btn {
+  background-color: transparent;
+  color: var(--logout-bg-color);
+  border: 1px solid var(--logout-bg-color);
 }
+.logout-btn:hover {
+  background-color: var(--logout-bg-color);
+  color: white;
+}
+
 </style>

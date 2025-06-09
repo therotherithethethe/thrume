@@ -29,6 +29,6 @@ public sealed class AccountConfiguration : IEntityTypeConfiguration<Account>
 
         builder.HasMany(a => a.Posts).WithOne(a => a.Author).HasForeignKey("author_id");
 
-        builder.Property(a => a.PictureUrl).HasMaxLength(100);
+        builder.Property(a => a.PictureUrl).HasMaxLength(500);
     }
 }

@@ -8,7 +8,7 @@ export const createPost = async (postData: CreatePostRequest): Promise<void> => 
     formData.append('Images', image);
   });
   
-  await axiosInstance.post('/posts', formData, {
+  await axiosInstance.post('/api/posts', formData, {
     headers: {
       'Content-Type': 'multipart/form-data'
     }
@@ -16,22 +16,22 @@ export const createPost = async (postData: CreatePostRequest): Promise<void> => 
 };
 
 export const likePost = (postId: string) => {
-  return axiosInstance.put('/posts/like', { value: postId });
+  return axiosInstance.put('/api/posts/like', { value: postId });
 };
 
 export const unlikePost = (postId: string) => {
-  return axiosInstance.put('/posts/unlike', { value: postId });
+  return axiosInstance.put('/api/posts/unlike', { value: postId });
 };
 
 export const deletePostById = (postId: string) => {
-  return axiosInstance.delete('/posts', {
+  return axiosInstance.delete('/api/posts', {
     data: { value: postId }
   });
 };
 
 // Create a new comment for a post
 export const createComment = (postId: string, content: string) => {
-  return axiosInstance.post('/comments', {
+  return axiosInstance.post('/api/comments', {
     postId: { value: postId },
     content,
     parentCommentId: null

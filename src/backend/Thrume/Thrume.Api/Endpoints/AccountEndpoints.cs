@@ -13,7 +13,7 @@ public static class AccountEndpoints
 {
     public static IEndpointRouteBuilder MapAccountEndpoints(this IEndpointRouteBuilder app)
     {
-        var accountGroup = app.MapGroup("/account").RequireAuthorization();
+        var accountGroup = app.MapGroup("/api/account").RequireAuthorization();
 
         accountGroup.MapGet("/search/{userName}", async (string userName, AppDbContext dbContext,
             [FromQuery]int page,
@@ -90,7 +90,7 @@ public static class AccountEndpoints
 
             return Results.Ok(profile);
         }).AllowAnonymous();
-        
+
         accountGroup.MapGet("/posts/recent",
             async (ClaimsPrincipal claimsPrincipal, AppDbContext dbContext, [FromQuery] int offset,
                 [FromQuery] int limit) =>
@@ -106,7 +106,7 @@ public static class AccountEndpoints
                     .Include(p => p.Author) // Eager load Author для UserName и PictureUrl
                     .Include(p => p.Comments).ThenInclude(p => p.Author)
                     .Where(p => followingAccountIds.Contains(p.Author.Id)); // Фильтруем по авторам
-                
+
                 // 4. Сортируем посты по дате создания (от новых к старым)
                 query = query.OrderByDescending(p => p.CreatedAt);
 
@@ -126,7 +126,7 @@ public static class AccountEndpoints
                         likedBy = p.LikedBy.Select(a => a.Id),
                         CreatedAt = p.CreatedAt,
                         Comments = p.Comments.OrderByDescending(c => c.CreatedAt).ToList(),
-                        
+
                     })
                     .ToListAsync();
 
@@ -153,7 +153,7 @@ public static class AccountEndpoints
                     return Results.BadRequest();
                 // 3. Выполняем операцию отписки
                 return Results.Ok();
-            });
+            }).RequireAuthorization("StandardAccess");
         
         accountGroup.MapPost("follow/{targetAccountIdString}",
             async (string targetAccountIdString, AccountService subscriptionService, ClaimsPrincipal user) =>
@@ -178,7 +178,7 @@ public static class AccountEndpoints
 
                 return Results.Ok();
 
-            });
+            }).RequireAuthorization("StandardAccess");
         
         accountGroup.MapPut("/updateProfile", async (IFormFile file/*,IAntiforgery antiforgery*/, HttpContext context, AccountService service) =>
         {
@@ -191,7 +191,7 @@ public static class AccountEndpoints
 
             await service.UpdateAvatarAsync(new AccountId(Guid.Parse(findFirst)), file);
             return Results.Ok();
-        }).Accepts<IFormFile>("multipart/form-data").DisableAntiforgery();
+        }).Accepts<IFormFile>("multipart/form-data").DisableAntiforgery().RequireAuthorization("StandardAccess");
 
         accountGroup.MapGet("/me", async (HttpContext context, AppDbContext dbContext, ILoggerFactory factory) =>
         {

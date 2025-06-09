@@ -19,7 +19,7 @@ const callStore = useCallStore(); // Initialize call store
 // Helper to fetch and store current user's account data
 async function fetchAndStoreCurrentAccount() {
   try {
-    const accountResponse = await apiClient.get<RawAccountFromApi>('account/me');
+    const accountResponse = await apiClient.get<RawAccountFromApi>('/api/account/me');
     if (accountResponse.status === 200 && accountResponse.data) {
       accountStore.setAccount(accountResponse.data);
       console.log('Account data stored:', accountStore.currentAccount);
@@ -41,6 +41,9 @@ onMounted(async () => {
   const isAuthenticated = await authStore.checkAuth();
   if (isAuthenticated) {
     await fetchAndStoreCurrentAccount();
+    
+    // Fetch roles for the authenticated user
+    accountStore.fetchRoles();
     
     // Initialize SignalR if user is authenticated
     try {

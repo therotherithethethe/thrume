@@ -9,9 +9,8 @@ function getCookie(name: string) {
     return null;
 }
 
-const apiClient = axios.create({
-    //baseURL: 'https://localhost:5133/api',
-    baseURL: '/',
+const axios = axios.create({
+    baseURL: 'https://localhost:5133',
     withCredentials: true,
     headers: {
         'Content-Type': 'application/json',
@@ -19,7 +18,7 @@ const apiClient = axios.create({
     }
 })
 
-apiClient.interceptors.request.use(
+axios.interceptors.request.use(
     config => {
         const methodsRequiringXsrf = ['POST', 'PUT', 'DELETE', 'PATCH'];
         if (methodsRequiringXsrf.includes(config.method!.toUpperCase())) {
@@ -37,5 +36,5 @@ apiClient.interceptors.request.use(
     }
 )
 
-export default apiClient
+export default axios
 

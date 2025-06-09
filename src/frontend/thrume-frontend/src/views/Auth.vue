@@ -16,7 +16,7 @@ const router = useRouter();
 
 async function fetchAndStoreCurrentAccount() {
   try {
-    const accountResponse = await apiClient.get<RawAccountFromApi>('account/me');
+    const accountResponse = await apiClient.get<RawAccountFromApi>('/api/account/me');
     if (accountResponse.status === 200 && accountResponse.data) {
       accountStore.setAccount(accountResponse.data);
       
@@ -35,7 +35,7 @@ async function fetchAndStoreCurrentAccount() {
 async function handleLogin() {
   console.log('Attempting login...');
   try {
-    const loginResponse = await apiClient.post('auth/login?useCookies=true', {
+    const loginResponse = await apiClient.post('/api/auth/login?useCookies=true', {
       email: email.value,
       password: password.value,
       twoFactorCode: null,

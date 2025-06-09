@@ -12,7 +12,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Thrume.Api;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,11 +32,12 @@ builder.Services.AddControllers();
 
 builder.AddEmailSender()
     .AddIdentity()
-    .AddDatabase()
+    .AddDatabase();
     //.AddAuth()
-    .AddMinio();
-builder.Services.AddAuthentication().AddCookie("Identity.Bearer");
 
+    builder.Services.AddSupabase();
+builder.Services.AddAuthentication().AddCookie("Identity.Bearer");
+builder.Services.AddScoped<IAuthorizationHandler, NotBannedHandler>();
 // SignalR Configuration
 builder.Services.AddSignalR(options =>
 {
@@ -58,6 +61,7 @@ builder.Services.AddTransient<AccountService>();
 builder.Services.AddTransient<CommentService>();
 builder.Services.AddTransient<PostService>();
 builder.Services.AddTransient<MessageService>();
+builder.Services.AddHttpContextAccessor(); 
 
 // Background services
 builder.Services.AddHostedService<CallCleanupService>();
@@ -121,6 +125,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 var app = builder.Build();
+
 app.UseExceptionHandler();
 app.MapScalarApiReference();
 app.MapOpenApi();
@@ -128,7 +133,7 @@ app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 //app.UseAntiforgery();
-var authGroup = app.MapGroup("/auth");
+var authGroup = app.MapGroup("/api/auth");
 
 
 authGroup.MapPost("/logout", async (SignInManager<Account> signInManager, HttpContext httpContext) =>
@@ -143,12 +148,28 @@ authGroup.MapPost("/logout", async (SignInManager<Account> signInManager, HttpCo
     return Results.Ok(); 
 });
 
-app.MapGroup("/auth").MapIdentityApi<Account>();
-app.MapGet("/auth/status", (ClaimsPrincipal claims) => 
+app.MapGroup("/api/auth").MapIdentityApi<Account>();
+app.MapGet("/api/auth/status", (ClaimsPrincipal claims) => 
     claims.Identity?.IsAuthenticated == true 
         ? Results.Ok(new { IsAuthenticated = true }) 
         : Results.Ok(new { IsAuthenticated = false })
         ).AllowAnonymous();
+app.MapGet("/api/account/role", async (ClaimsPrincipal claimsPrincipal, UserManager<Account> userManager) =>
+{
+    var user = await userManager.GetUserAsync(claimsPrincipal);
+    if (user == null)
+    {
+        // Ця ситуація малоймовірна, якщо є .RequireAuthorization(), але це надійна перевірка
+        return Results.NotFound("User not found."); 
+    }
+
+    // 2. Отримуємо його ролі
+    var roles = await userManager.GetRolesAsync(user);
+
+    // 3. Повертаємо результат
+    return Results.Ok(roles);
+}).RequireAuthorization();
+
 
 // app.MapGet("/antiforgery/token", (IAntiforgery antiforgery, HttpContext context) =>
 //     {
@@ -162,14 +183,16 @@ app.MapPostEndpoints();
 app.MapAccountEndpoints();
 app.MapCommentEndpoints();
 app.MapMessageEndpoints();
+app.MapAdminEndpoints();
 
 // Map Call Controller
 app.MapControllers();
-
+app.MapHub<VoiceCallHub>("/voiceCallHub");
 // SignalR Hub mapping
 app.MapHub<ChatHub>("/chathub");
 
 app.MapGet("/", () => Results.Redirect("/scalar"));
+await app.CheckRoles();
 app.Run();
 
 static bool IsApiRequest(HttpRequest request)

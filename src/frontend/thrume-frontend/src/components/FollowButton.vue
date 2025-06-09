@@ -57,8 +57,8 @@ const handleClick = async () => {
   loading.value = true;
   try {
     const endpoint = props.isFollowing
-      ? `/account/unfollow/${props.targetAccountId}`
-      : `/account/follow/${props.targetAccountId}`;
+      ? `/api/account/unfollow/${props.targetAccountId}`
+      : `/api/account/follow/${props.targetAccountId}`;
     
     console.log('Calling API endpoint:', endpoint);
     

@@ -15,7 +15,7 @@ public static class PostEndpoints
 {
     public static IEndpointRouteBuilder MapPostEndpoints(this IEndpointRouteBuilder app)
     {
-        var postsGroup = app.MapGroup("/posts").RequireAuthorization();
+        var postsGroup = app.MapGroup("/api/posts").RequireAuthorization();
 
         postsGroup.MapDelete("/", async (HttpContext context, [FromBody]PostId id, PostService service) =>
         {
@@ -33,7 +33,7 @@ public static class PostEndpoints
             var guid = Guid.Parse(userIdClaim.Value);
             await service.CreatePostsAsync(new AccountId(guid), createPostRequest);
             return Results.Ok();
-        }).Accepts<IFormFile>("multipart/form-data").DisableAntiforgery().RequireAuthorization();
+        }).Accepts<IFormFile>("multipart/form-data").DisableAntiforgery().RequireAuthorization("StandardAccess");
 
 
         postsGroup.MapGet("/{userName}", async ([FromRoute]string userName, HttpContext context, AppDbContext dbContext) =>
@@ -69,7 +69,7 @@ public static class PostEndpoints
             await postService.LikePostAsync(accId, id);
 
             return Results.Ok(); 
-        });
+        }).RequireAuthorization("StandardAccess");
         postsGroup.MapPut("/unlike", async (HttpContext context, [FromBody] PostId id, PostService postService/*, IAntiforgery antiforgery*/) =>
         {
             //await antiforgery.ValidateRequestAsync(context);
@@ -78,7 +78,7 @@ public static class PostEndpoints
             await postService.UnlikePostAsync(accId, id);
 
             return Results.Ok(); 
-        });
+        }).RequireAuthorization("StandardAccess");
 
         return app; 
     }

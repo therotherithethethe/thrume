@@ -12,6 +12,7 @@
         <PackageReference Include="MailKit"/>
         <PackageReference Include="Microsoft.AspNetCore.Identity.UI"/>
         <PackageReference Include="AWSSDK.S3"/>
+        <PackageReference Include="Supabase"/>
     </ItemGroup>
 
     <ItemGroup>

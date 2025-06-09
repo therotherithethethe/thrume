@@ -23,5 +23,6 @@
     <PackageVersion Include="Microsoft.Office.Interop.Outlook" Version="15.0.4797.1004" />
     <PackageVersion Include="EFCore.NamingConventions" Version="9.0.0" />
     <PackageVersion Include="AWSSDK.S3" Version="3.7.415.25" />
+    <PackageVersion Include="Supabase" Version="1.1.1" />
   </ItemGroup>
 </Project>

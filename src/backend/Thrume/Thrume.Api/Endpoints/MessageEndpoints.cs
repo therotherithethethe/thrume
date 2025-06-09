@@ -31,7 +31,7 @@ public static class MessageEndpoints
 {
     public static IEndpointRouteBuilder MapMessageEndpoints(this IEndpointRouteBuilder app)
     {
-        var messagesGroup = app.MapGroup("/messages").RequireAuthorization();
+        var messagesGroup = app.MapGroup("/api/messages").RequireAuthorization();
 
         messagesGroup.MapGet("/conversations", async (HttpContext context, MessageService messageService) =>
         {
@@ -71,7 +71,7 @@ public static class MessageEndpoints
             }
             
             return Results.Ok();
-        });
+        }).RequireAuthorization("StandardAccess");
 
         messagesGroup.MapDelete("/conversations/{conservationId}", 
             async (HttpContext context, string conservationId, AppDbContext dbContext) =>
@@ -88,7 +88,7 @@ public static class MessageEndpoints
                 dbContext.ConversationDbSet.Remove(conversation);
                 await dbContext.SaveChangesAsync();
                 return Results.Ok();
-            });
+            }).RequireAuthorization("StandardAccess");
 
 
         messagesGroup.MapGet("/conversations/{conservationId}", async (
@@ -181,7 +181,7 @@ public static class MessageEndpoints
 
             var response = new MessageResponse(message.Id, message.ConversationId, message.SenderId, message.Content, message.SentAt);
             return Results.Ok(response);
-        });
+        }).RequireAuthorization("StandardAccess");
 
 
         return app;

@@ -155,9 +155,8 @@ const checkIfUserFollowsMe = async (targetUserName: string): Promise<boolean> =>
   
   try {
     // Get the followers of the current user to see if the target user is among them
-    const response = await apiClient.get(`/account/followers/${accountStore.accountUsername}`);
+    const response = await axios.get(`/api/account/followers/${accountStore.accountUsername}`);
     const followers = response.data;
-    
     // Check if the target user is in the followers list
     return followers.some((follower: any) => follower.userName === targetUserName);
   } catch (error) {
@@ -171,9 +170,9 @@ const fetchProfileData = async (name: string) => {
   profileError.value = null;
   
   try {
-    const response = await axios.get<ProfileData>(`/account/profile/${name}`);
+    const response = await apiClient.get<ProfileData>(`/api/account/profile/${name}`);
     const baseProfileData = response.data;
-    
+    console.log(response);
     // Check if the target user is following the current user
     const isUserFollowingMe = await checkIfUserFollowsMe(name);
     
@@ -182,6 +181,7 @@ const fetchProfileData = async (name: string) => {
       ...baseProfileData,
       isUserFollowingMe
     };
+    console.log(profileData.value);
   } catch (err: any) {
     console.error('Failed to fetch profile data:', err);
     profileError.value = 'Failed to load profile data.';
@@ -197,7 +197,7 @@ const fetchPostsByUsername = async (name: string) => {
   processedPosts.value = [];
 
   try {
-    const response = await apiClient.get<RawPostFromApi[]>(`posts/${name}`);
+    const response = await apiClient.get<RawPostFromApi[]>(`/api/posts/${name}`);
 
     if (response.data && response.data.length > 0) {
       rawPosts.value = response.data;

@@ -16,12 +16,12 @@ export interface SendMessageResponse {
 }
 
 export const getConversations = async (): Promise<Conversation[]> => {
-  const response = await axiosInstance.get('/messages/conversations');
+  const response = await axiosInstance.get('/api/messages/conversations');
   return response.data;
 };
 
 export const getMessages = async (conversationId: string, page: number = 1, pageSize: number = 20): Promise<Message[]> => {
-  const response = await axiosInstance.get(`/messages/conversations/${conversationId}`, {
+  const response = await axiosInstance.get(`/api/messages/conversations/${conversationId}`, {
     params: { page, pageSize }
   });
   return response.data;
@@ -29,7 +29,7 @@ export const getMessages = async (conversationId: string, page: number = 1, page
 
 export const startConversation = async (userName: string): Promise<Conversation> => {
   try {
-    const response = await axiosInstance.post(`/messages/conversations/start/${userName}`);
+    const response = await axiosInstance.post(`/api/messages/conversations/start/${userName}`);
     
     if (response.status === 200) {
       return response.data;
@@ -46,7 +46,7 @@ export const startConversation = async (userName: string): Promise<Conversation>
 
 export const deleteConversation = async (conversationId: string): Promise<void> => {
   try {
-    const response = await axiosInstance.delete(`/messages/conversations/${conversationId}`);
+    const response = await axiosInstance.delete(`/api/messages/conversations/${conversationId}`);
     
     if (response.status === 200) {
       console.log('Conversation deleted successfully');
@@ -75,7 +75,7 @@ export async function sendMessage(conversationId: string, content: string): Prom
       content: content
     };
 
-    const response = await axiosInstance.post<SendMessageResponse>('/messages/conversations', requestBody);
+    const response = await axiosInstance.post<SendMessageResponse>('/api/messages/conversations', requestBody);
     
     console.log('Message sent successfully:', response.data);
     return response.data;

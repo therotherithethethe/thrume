@@ -16,6 +16,7 @@
     "@microsoft/signalr": "^8.0.7",
     "axios": "^1.9.0",
     "jwt-decode": "^4.0.0",
+    "lucide-vue-next": "^0.513.0",
     "pinia": "^3.0.1",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0",

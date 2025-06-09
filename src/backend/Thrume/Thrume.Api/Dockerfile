@@ -11,11 +11,11 @@ COPY ["Thrume.Infrastructure/Thrume.Infrastructure.csproj", "Thrume.Infrastructu
 RUN dotnet restore "Thrume.Api/Thrume.Api.csproj"
 COPY . .
 WORKDIR "/src/Thrume.Api"
-RUN dotnet build "Thrume.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "Thrume.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build --no-restore -v detailed
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "Thrume.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "Thrume.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false --no-restore -v detailed
 
 FROM base AS final
 WORKDIR "/src/Thrume.Api"

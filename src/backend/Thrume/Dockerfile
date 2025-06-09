@@ -5,12 +5,9 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 COPY . /src
 WORKDIR /src
 
-# Тепер restore знайде всі файли, тому що структура папок правильна
-RUN dotnet restore "Thrume.sln"
-
-# Публікуємо проєкт
-# --no-restore, бо ми вже зробили restore на попередньому кроці
-RUN dotnet publish "Thrume.Api/Thrume.Api.csproj" -c Release -o /app/publish --no-restore
+# Виконуємо publish. Ця команда автоматично виконає restore і build.
+# Це може бути більш ефективним з точки зору пам'яті.
+RUN dotnet publish "Thrume.Api/Thrume.Api.csproj" -c Release -o /app/publish
 
 # --- Етап 2: Фінальний образ (Final Stage) ---
 FROM mcr.microsoft.com/dotnet/aspnet:9.0-preview AS final

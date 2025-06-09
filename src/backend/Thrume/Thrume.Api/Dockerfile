@@ -12,7 +12,7 @@ COPY ["Thrume.Configuration/Thrume.Configuration.csproj", "Thrume.Configuration/
 COPY ["Thrume.Database/Thrume.Database.csproj", "Thrume.Database/"]
 COPY ["Thrume.Domain/Thrume.Domain.csproj", "Thrume.Domain/"]
 COPY ["Thrume.Infrastructure/Thrume.Infrastructure.csproj", "Thrume.Infrastructure/"]
-COPY ["Thrume.Services/Thrume.Services.csproj", "Thrume.Services/"]
+
 
 # Відновлюємо пакети для всього рішення
 RUN dotnet restore "Thrume.sln"

@@ -12,6 +12,7 @@ export const useAccountStore = defineStore('account', () => {
   const loading = ref(false); // For loading `currentAccount`
   const error = ref<string | null>(null); // For `currentAccount` errors
   const roles = ref<string[]>([]); // Added for role storage
+  const connectionId = ref<string>('');
 
   // Getters: Use computed for derived state
   const isLoggedIn = computed(() => !!currentAccount.value);
@@ -157,5 +158,6 @@ export const useAccountStore = defineStore('account', () => {
     updateProfilePicture,
     fetchRoles,
     roles,
+    connectionId
   };
 });

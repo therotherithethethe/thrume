@@ -24,17 +24,17 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Content Include="..\.dockerignore">
-            <Link>.dockerignore</Link>
-        </Content>
-    </ItemGroup>
-
-    <ItemGroup>
         <ProjectReference Include="..\Thrume.Configuration\Thrume.Configuration.csproj"/>
         <ProjectReference Include="..\Thrume.Database\Thrume.Database.csproj"/>
         <ProjectReference Include="..\Thrume.Domain\Thrume.Domain.csproj"/>
         <ProjectReference Include="..\Thrume.Infrastructure\Thrume.Infrastructure.csproj"/>
         <ProjectReference Include="..\Thrume.Services\Thrume.Services.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="..\.dockerignore">
+        <Link>.dockerignore</Link>
+      </Content>
     </ItemGroup>
 
 </Project>

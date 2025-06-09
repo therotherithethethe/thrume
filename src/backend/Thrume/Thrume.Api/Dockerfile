@@ -1,23 +1,20 @@
-﻿FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+﻿# --- Етап 1: Збірка (Build Stage) ---
+# Використовуємо повний SDK для компіляції
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+
+# !!! ЗЛАМУЄМО КЕШ !!!
+# Кожного разу, коли потрібна повна перебудова, змініть це значення
+ARG CACHE_BUSTER=1 
+
 WORKDIR /src
 
-# Копіюємо файли з папки Thrume
-COPY ["Thrume/*.sln", "Thrume/Directory.Packages.props", "./"]
-COPY Thrume/**/*.csproj ./
+# --- ДІАГНОСТИКА ---
+# Показуємо вміст поточної директорії (контексту збірки)
+RUN ls -la
+# ------------------
 
-# Переконуємось, що restore знайде проєкти
-# (можливо доведеться вказати повний шлях до .sln)
-RUN dotnet restore "./Thrume.sln"
+# Копіюємо .sln та всі файли .csproj...
+COPY ["*.sln", "Directory.Packages.props", "./"]
+COPY **/*.csproj ./
 
-# Копіюємо весь проєкт
-COPY Thrume/. .
-
-RUN dotnet publish "Thrume.Api/Thrume.Api.csproj" -c Release -o /app/publish --no-restore
-
-# --- Етап 2: Фінальний образ (Final Stage) ---
-FROM mcr.microsoft.com/dotnet/aspnet:9.0-preview AS final
-WORKDIR /app
-COPY --from=build /app/publish .
-ENV ASPNETCORE_URLS=http://+:8080
-EXPOSE 8080
-ENTRYPOINT ["dotnet", "Thrume.Api.dll"]
+# ... решта файлу ...

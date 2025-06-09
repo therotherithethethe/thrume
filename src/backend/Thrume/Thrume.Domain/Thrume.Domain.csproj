@@ -16,4 +16,8 @@
             <HintPath>..\..\..\..\..\..\..\..\program files\dotnet\shared\Microsoft.AspNetCore.App\9.0.2\Microsoft.AspNetCore.Http.Features.dll</HintPath>
         </Reference>
     </ItemGroup>
+
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
 </Project>

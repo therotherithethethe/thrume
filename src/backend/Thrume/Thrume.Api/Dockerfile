@@ -18,6 +18,5 @@ ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "Thrume.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
-WORKDIR /app
-COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Thrume.Api.dll"]
+WORKDIR "/src/Thrume.Api"
+RUN dotnet publish "Thrume.Api.csproj" -c Release -o /app/publish --no-restore -v detailed

@@ -11,34 +11,37 @@ namespace Thrume.Infrastructure;
 public sealed class IdentityEmailSender<TEntity> : IEmailSender<TEntity> where TEntity : class
 {
     private readonly ILogger<IdentityEmailSender<TEntity>> _logger;
-
-    //TODO: NOT IDEAL
-    private readonly UserCredential _userCredentials;
+    private UserCredential? _userCredential;
 
     public IdentityEmailSender(ILogger<IdentityEmailSender<TEntity>> logger)
     {
         _logger = logger;
-        _userCredentials = Setup(CancellationToken.None).GetAwaiter().GetResult();
     }
 
     public async Task SendConfirmationLinkAsync(TEntity user, string email, string confirmationLink)
     {
+        var credentials = await GetOrCreateCredentialsAsync(CancellationToken.None);
+        if (credentials is null)
+        {
+            _logger.LogError("Failed to obtain Google credentials. Cannot send email.");
+            return;
+        }
+
         var smtpClient = new SmtpClient();
         try
         {
             await smtpClient.ConnectAsync("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
-            await smtpClient.AuthenticateAsync(new SaslMechanismOAuth2(_userCredentials.UserId,
-                _userCredentials.Token.AccessToken));
+            await smtpClient.AuthenticateAsync(new SaslMechanismOAuth2(credentials.UserId, credentials.Token.AccessToken));
+            
             var message = new MimeMessage();
             message.From.Add(new MailboxAddress("wildchild", "wildchild250336@gmail.com"));
-            message.To.Add(new MailboxAddress("asdasd", email));
+            message.To.Add(new MailboxAddress("User", email));
             message.Subject = "Test Email via OAuth";
 
             var messageText = $"<p>Please confirm your account by <a href='{confirmationLink}'>clicking here</a>.</p>";
             message.Body = new TextPart("html") { Text = messageText };
 
             await smtpClient.SendAsync(message);
-            await smtpClient.DisconnectAsync(true);
         }
         catch (Exception e)
         {
@@ -52,33 +55,43 @@ public sealed class IdentityEmailSender<TEntity> : IEmailSender<TEntity> where T
         }
     }
 
-    public Task SendPasswordResetCodeAsync(TEntity user, string email, string resetCode)
-    {
-        throw new NotImplementedException();
-    }
+    public Task SendPasswordResetCodeAsync(TEntity user, string email, string resetCode) => throw new NotImplementedException();
+    public Task SendPasswordResetLinkAsync(TEntity user, string email, string resetLink) => throw new NotImplementedException();
 
-    public Task SendPasswordResetLinkAsync(TEntity user, string email, string resetLink)
+    private async Task<UserCredential?> GetOrCreateCredentialsAsync(CancellationToken ct)
     {
-        throw new NotImplementedException();
-    }
+        if (_userCredential is not null)
+        {
+            if (_userCredential.Token.IsStale)
+            {
+                _logger.LogInformation("Access token is stale, refreshing...");
+                if (await _userCredential.RefreshTokenAsync(ct))
+                {
+                    _logger.LogInformation("Access token was successfully refreshed.");
+                }
+                else
+                {
+                    _logger.LogWarning("Failed to refresh access token.");
+                    _userCredential = null;
+                }
+            }
+            return _userCredential;
+        }
 
-    private async Task<UserCredential> Setup(CancellationToken ct)
-    {
+        _logger.LogInformation("Credentials not found in memory, initializing...");
         const string user = "wildchild250336@gmail.com";
         const string api = "https://mail.google.com/";
         await using var stream = new FileStream("credentials.json", FileMode.Open, FileAccess.Read);
         var googleClientSecrets = await GoogleClientSecrets.FromStreamAsync(stream, ct);
 
-        var credentials = await GoogleWebAuthorizationBroker.AuthorizeAsync(
+        _userCredential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
             googleClientSecrets.Secrets,
             [api],
             user,
             ct,
             new FileDataStore("token.json", true));
-        if (!credentials.Token.IsStale) return credentials; //TODO
-        await credentials.RefreshTokenAsync(ct);
-        await Setup(ct);
-
-        return credentials;
+        
+        _logger.LogInformation("Credentials successfully initialized.");
+        return _userCredential;
     }
 }

@@ -251,5 +251,3 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
-**credentials*
-**/token.json

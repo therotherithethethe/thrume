@@ -17,19 +17,19 @@ export default defineConfig({
     },
     proxy: {
       '/chathub': {
-        target: 'https://localhost:7123',
+        target: 'https://localhost:5133',
         changeOrigin: true,
         secure: false,
         ws: true, // Enable WebSocket proxying for SignalR
       },
       '/api': {
-        target: 'https://localhost:7123',
+        target: 'https://localhost:5133',
         changeOrigin: true,
         secure: false,
         // rewrite: (path) => path.replace(/^\/api/, ''),
       },
       '/voiceCallHub': {
-        target: 'https://localhost:7123',
+        target: 'https://localhost:5133',
         changeOrigin: true,
         secure: false,
         ws: true, 

@@ -1,15 +1,15 @@
 ﻿# --- Етап 1: Збірка (Build Stage) ---
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+
+# Копіюємо весь проєкт одразу, зберігаючи структуру папок
+COPY . /src
 WORKDIR /src
 
-# Шляхи вказані без префіксів, бо Build Context = src/backend/Thrume
-COPY ["*.sln", "Directory.Packages.props", "./"]
-COPY **/*.csproj ./
-
+# Тепер restore знайде всі файли, тому що структура папок правильна
 RUN dotnet restore "Thrume.sln"
 
-COPY . .
-
+# Публікуємо проєкт
+# --no-restore, бо ми вже зробили restore на попередньому кроці
 RUN dotnet publish "Thrume.Api/Thrume.Api.csproj" -c Release -o /app/publish --no-restore
 
 # --- Етап 2: Фінальний образ (Final Stage) ---

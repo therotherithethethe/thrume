@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Thrume.Api;
+using Microsoft.AspNetCore.HttpOverrides;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,6 +23,15 @@ builder.Services.Configure<ServiceProviderOptions>(options =>
 {
     options.ValidateScopes = true;
     options.ValidateOnBuild = true;
+});
+
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    // Render не використовує стандартний порт, тому не обмежуємо мережі
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
 });
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -133,6 +143,7 @@ app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 //app.UseAntiforgery();
+app.UseForwardedHeaders();
 var authGroup = app.MapGroup("/api/auth");
 
 

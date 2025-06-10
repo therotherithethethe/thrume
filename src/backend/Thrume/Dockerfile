@@ -1,16 +1,25 @@
 ﻿# --- Етап 1: Збірка (Build Stage) ---
 FROM mcr.microsoft.com/dotnet/sdk:9.0.200 AS build
-
-# Копіюємо весь проєкт одразу, зберігаючи структуру папок
-COPY . /src
 WORKDIR /src
 
-# Тепер restore знайде всі файли, тому що структура папок правильна
+# Копіюємо .sln та .csproj файли для відновлення залежностей
+# Це дозволить кешувати шар з залежностями
+COPY Thrume.sln .
+COPY Thrume.Api/Thrume.Api.csproj Thrume.Api/
+# Якщо є інші проєкти, їх .csproj теж треба скопіювати
+# COPY Thrume.Core/Thrume.Core.csproj Thrume.Core/
+# ...
+
+# Відновлюємо залежності
 RUN dotnet restore "Thrume.sln"
 
+# Тепер копіюємо решту файлів проєкту
+COPY . .
+WORKDIR "/src/Thrume.Api"
+
 # Публікуємо проєкт
-# --no-restore, бо ми вже зробили restore на попередньому кроці
-RUN dotnet publish "Thrume.Api/Thrume.Api.csproj" -c Release -o /app/publish --no-restore
+# --no-restore, бо ми вже зробили restore
+RUN dotnet publish "Thrume.Api.csproj" -c Release -o /app/publish --no-build
 
 # --- Етап 2: Фінальний образ (Final Stage) ---
 FROM mcr.microsoft.com/dotnet/aspnet:9.0.2 AS final

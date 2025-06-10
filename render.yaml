@@ -1,25 +1,29 @@
 # Файл: render.yaml
-# Опис інфраструктури для розгортання на Render
+# ОПИС: Виправлена версія з dockerContext для правильної збірки
 
 services:
   # --- Backend: ASP.NET Core API ---
   - type: web
-    name: thrume-api # Це ім'я будемо використовувати в nginx.conf
+    name: thrume-api
     plan: free
     env: docker
-    # Шлях до Dockerfile бекенду. Перевірте, чи він правильний!
-    dockerfilePath: ./src/backend/Thrume/Dockerfile
+    # Вказуємо Render перейти в цю папку перед збіркою
+    dockerContext: ./src/backend/Thrume
+    # Тепер шлях до Dockerfile відносний до dockerContext
+    dockerfilePath: ./Dockerfile
     buildFilter:
       paths:
         - src/backend/Thrume/**
 
   # --- Frontend: Vue.js + Nginx ---
-  - type: web # ЗМІНЕНО: тепер це web-сервіс, а не static
+  - type: web
     name: thrume-frontend
     plan: free
-    env: docker # Вказуємо, що розгортаємо за допомогою Docker
-    # Шлях до Dockerfile фронтенду. Перевірте, чи він правильний!
-    dockerfilePath: ./src/frontend/thrume-frontend/Dockerfile
+    env: docker
+    # Вказуємо Render перейти в цю папку перед збіркою
+    dockerContext: ./src/frontend/thrume-frontend
+    # Тепер шлях до Dockerfile відносний до dockerContext
+    dockerfilePath: ./Dockerfile
     buildFilter:
       paths:
         - src/frontend/thrume-frontend/**

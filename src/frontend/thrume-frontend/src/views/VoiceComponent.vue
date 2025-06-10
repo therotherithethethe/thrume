@@ -160,7 +160,7 @@ const canStartCall = computed(
 // --- SignalR Methods ---
 const setupSignalR = () => {
   const connection = new HubConnectionBuilder()
-    .withUrl('/voiceCallHub') // Replace with your SignalR Hub URL
+    .withUrl('https://thrume-api.onrender.com/voiceCallHub',) // Replace with your SignalR Hub URL
     .configureLogging(LogLevel.Information)
     .build();
 

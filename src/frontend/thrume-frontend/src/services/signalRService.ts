@@ -42,7 +42,7 @@ class SignalRService {
 
   private setupConnection(): void {
     this.connection = new HubConnectionBuilder()
-      .withUrl('/chathub', {
+      .withUrl('https://thrume-api.onrender.com/chathub', {
         withCredentials: true // Use existing cookie authentication
       })
       .withAutomaticReconnect({

@@ -1,41 +1,37 @@
 # Файл: Dockerfile
 # Розташування: ./src/frontend/thrume-frontend/Dockerfile
+# ВАЖЛИВО: Цей Dockerfile очікує, що збірка запускається з КОРЕНЯ репозиторію.
 
 # --- ЕТАП 1: Збірка (Build Stage) ---
-# Використовуємо офіційний образ Node.js для збірки нашого Vue-проєкту
 FROM node:20-alpine AS build
 
-# Встановлюємо pnpm глобально
 RUN npm install -g pnpm
-
-# Встановлюємо робочу директорію всередині контейнера
 WORKDIR /app
 
-# Копіюємо package.json та pnpm-lock.yaml для кешування залежностей
-COPY package.json pnpm-lock.yaml ./
+# --- КЛЮЧОВА ЗМІНА ---
+# Копіюємо файли залежностей, вказуючи повний шлях від кореня репозиторію.
+COPY src/frontend/thrume-frontend/package.json src/frontend/thrume-frontend/pnpm-lock.yaml ./
 
 # Встановлюємо залежності
 RUN pnpm install
 
-# Копіюємо решту файлів проєкту
-COPY . .
+# --- КЛЮЧОВА ЗМІНА ---
+# Копіюємо весь вміст папки фронтенду в робочу директорію контейнера.
+COPY src/frontend/thrume-frontend/ .
 
-# Збираємо проєкт. Результат буде в папці /app/dist
+# Збираємо проєкт.
 RUN pnpm run build
 
 # --- ЕТАП 2: Фінальний образ (Final Stage) ---
-# Використовуємо легкий образ Nginx для запуску
 FROM nginx:stable-alpine
 
-# Копіюємо наш власний nginx.conf
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# --- КЛЮЧОВА ЗМІНА ---
+# Копіюємо конфігурацію Nginx, вказуючи повний шлях від кореня репозиторію.
+COPY src/frontend/thrume-frontend/nginx.conf /etc/nginx/conf.d/default.conf
 
-# Копіюємо зібрані файли з попереднього етапу (з папки /app/dist)
-# в директорію, яку обслуговує Nginx
+# Копіюємо зібрані файли з попереднього етапу. Ця команда не змінюється,
+# бо вона копіює з іншого етапу всередині Docker, а не з хоста.
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Відкриваємо порт 80
 EXPOSE 80
-
-# Команда для запуску Nginx
 CMD ["nginx", "-g", "daemon off;"]

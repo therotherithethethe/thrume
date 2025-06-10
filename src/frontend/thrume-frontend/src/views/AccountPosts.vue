@@ -154,9 +154,10 @@ const checkIfUserFollowsMe = async (targetUserName: string): Promise<boolean> =>
   }
   
   try {
-    // Get the followers of the current user to see if the target user is among them
-    const response = await axios.get(`/api/account/followers/${accountStore.accountUsername}`);
+    const response = await apiClient.get(`/api/account/following/${accountStore.accountUsername}`);
     const followers = response.data;
+    console.error(followers);
+    console.log(targetUserName);
     // Check if the target user is in the followers list
     return followers.some((follower: any) => follower.userName === targetUserName);
   } catch (error) {
@@ -246,6 +247,22 @@ watch(
       await fetchAccountData(newUsernameParam);
     }
   },
+);
+
+watch(
+  () => accountStore.accountUsername,
+  async (newUsername, oldUsername) => {
+      const currentUsernameParam = route.params.name;
+
+  if (typeof currentUsernameParam === 'string') {
+    await fetchProfileData(currentUsernameParam);
+  } else if (Array.isArray(currentUsernameParam) && currentUsernameParam.length > 0) {
+    await fetchProfileData(currentUsernameParam[0]);
+  } else {
+
+  }
+    }
+
 );
 
 const handleCommentAdded = async (postId: string) => {

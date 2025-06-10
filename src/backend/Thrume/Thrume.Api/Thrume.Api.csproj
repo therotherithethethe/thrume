@@ -32,9 +32,12 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Content Include="credentials.json">
+        <!-- Use "Update" for the file the SDK already found -->
+        <Content Update="credentials.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
+
+        <!-- Use "Include" for the folder/contents, as the SDK might not grab it automatically -->
         <Content Include="token.json\**">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>

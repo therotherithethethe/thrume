@@ -10,7 +10,7 @@ services:
     # Вказуємо Render перейти в цю папку перед збіркою
     dockerContext: ./src/backend/Thrume
     # Тепер шлях до Dockerfile відносний до dockerContext
-    dockerfilePath: ./Dockerfile
+    dockerfilePath: Dockerfile
     buildFilter:
       paths:
         - src/backend/Thrume/**
@@ -23,7 +23,7 @@ services:
     # Вказуємо Render перейти в цю папку перед збіркою
     dockerContext: ./src/frontend/thrume-frontend
     # Тепер шлях до Dockerfile відносний до dockerContext
-    dockerfilePath: ./Dockerfile
+    dockerfilePath: Dockerfile
     buildFilter:
       paths:
         - src/frontend/thrume-frontend/**

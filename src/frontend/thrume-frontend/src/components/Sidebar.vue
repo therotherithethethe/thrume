@@ -73,7 +73,7 @@ const logout = async () => {
           <span>Messages</span>
         </router-link>
 
-        <router-link v-if="isLoggedIn" :to="'/search/'" class="nav-item">
+        <router-link v-if="isLoggedIn" :to="'/search/ '" class="nav-item">
           <Search :size="20" />
           <span>Search</span>
         </router-link>

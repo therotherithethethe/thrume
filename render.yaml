@@ -1,5 +1,5 @@
 # Файл: render.yaml
-# ВИПРАВЛЕНО: Шляхи використовують / замість \ для сумісності з Linux
+# ВИПРАВЛЕНО: Спрощено dockerfilePath для відповідності до dockerContext
 
 services:
   # --- Backend: ASP.NET Core API ---
@@ -7,10 +7,10 @@ services:
     name: thrume-api
     plan: free
     env: docker
-    # Render перейде в цю папку (з /)
+    # КОНТЕКСТ: Render переходить в цю папку.
     dockerContext: ./src/backend/Thrume
-    # Render шукатиме цей файл всередині папки вище
-    dockerfilePath: ./src/backend/Thrume/Dockerfile
+    # ШЛЯХ: Render шукає цей файл ВЖЕ ВСЕРЕДИНІ папки з dockerContext.
+    dockerfilePath: Dockerfile
     buildFilter:
       paths:
         - src/backend/Thrume/**
@@ -20,10 +20,8 @@ services:
     name: thrume-frontend
     plan: free
     env: docker
-    # Render перейде в цю папку (з /)
     dockerContext: ./src/frontend/thrume-frontend
-    # Render шукатиме цей файл всередині папки вище
-    dockerfilePath: ./src/frontend/thrume-frontend/Dockerfile
+    dockerfilePath: Dockerfile
     buildFilter:
       paths:
         - src/frontend/thrume-frontend/**

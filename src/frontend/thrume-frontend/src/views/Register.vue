@@ -9,8 +9,8 @@ import { RawAccountFromApi } from "../types";
 import { AxiosError } from "axios";
 
 // Form and Auth State
-const email = ref('1lexoradka280211@gmail.com');
-const password = ref('123456');
+const email = ref('');
+const password = ref('');
 const authStore = useAuthStore();
 const accountStore = useAccountStore();
 const router = useRouter();

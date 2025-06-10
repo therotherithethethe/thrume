@@ -7,8 +7,8 @@ import { useAccountStore } from "../stores/accountStore";
 import { useRouter } from "vue-router";
 import { RawAccountFromApi } from "../types";
 
-const email = ref('lexoradka280211@gmail.com');
-const password = ref('123456');
+const email = ref('');
+const password = ref('');
 
 const authStore = useAuthStore();
 const accountStore = useAccountStore();

@@ -1,31 +1,22 @@
 ﻿# --- Етап 1: Збірка (Build Stage) ---
+# Цей Dockerfile очікує, що збірка запускається з КОРЕНЯ репозиторію.
 FROM mcr.microsoft.com/dotnet/sdk:9.0.200 AS build
 WORKDIR /src
 
-# --- ВАЖЛИВІ ЗМІНИ ТУТ ---
-# Спочатку копіюємо .sln та ВСІ .csproj файли, які потрібні для restore.
-# Це оптимізує кешування Docker: залежності не будуть завантажуватись знову,
-# якщо ви змінили тільки код, а не файли проєктів.
+# --- КЛЮЧОВА ЗМІНА ---
+# Копіюємо вміст папки /src/backend/Thrume/ з хоста (контексту збірки)
+# в поточну робочу папку /src всередині контейнера.
+# Крапка в кінці важлива!
+COPY src/backend/Thrume/ .
 
-COPY Thrume.sln .
-COPY Thrume.Api/Thrume.Api.csproj Thrume.Api/
-COPY Thrume.Database/Thrume.Database.csproj Thrume.Database/
-COPY Thrume.Domain/Thrume.Domain.csproj Thrume.Domain/
-COPY Thrume.Common/Thrume.Common.csproj Thrume.Common/
-COPY Thrume.Configuration/Thrume.Configuration.csproj Thrume.Configuration/
-COPY Thrume.Infrastructure/Thrume.Infrastructure.csproj Thrume.Infrastructure/
-COPY Thrume.Services/Thrume.Services.csproj Thrume.Services/
+# Після цього кроку структура файлів всередині /src контейнера буде правильною.
+# /src/Thrume.sln
+# /src/Thrume.Api/
+# ... і так далі
 
-# Тепер restore знайде всі проєкти, на які посилається .sln файл.
+# Тепер restore і publish працюватимуть без змін.
 RUN dotnet restore "Thrume.sln"
-
-# Після відновлення залежностей копіюємо решту файлів проєкту.
-COPY . .
-WORKDIR "/src/Thrume.Api"
-
-# Публікуємо головний проєкт.
-# --no-restore, оскільки ми вже виконали restore.
-RUN dotnet publish "Thrume.Api.csproj" -c Release -o /app/publish --no-build
+RUN dotnet publish "Thrume.Api/Thrume.Api.csproj" -c Release -o /app/publish --no-restore
 
 # --- Етап 2: Фінальний образ (Final Stage) ---
 FROM mcr.microsoft.com/dotnet/aspnet:9.0.2 AS final

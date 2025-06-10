@@ -10,7 +10,7 @@ services:
     # Render перейде в цю папку (з /)
     dockerContext: ./src/backend/Thrume
     # Render шукатиме цей файл всередині папки вище
-    dockerfilePath: Dockerfile
+    dockerfilePath: ./src/backend/Thrume/Dockerfile
     buildFilter:
       paths:
         - src/backend/Thrume/**
@@ -23,7 +23,7 @@ services:
     # Render перейде в цю папку (з /)
     dockerContext: ./src/frontend/thrume-frontend
     # Render шукатиме цей файл всередині папки вище
-    dockerfilePath: Dockerfile
+    dockerfilePath: ./src/frontend/thrume-frontend/Dockerfile
     buildFilter:
       paths:
         - src/frontend/thrume-frontend/**

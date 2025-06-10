@@ -78,16 +78,16 @@ builder.Services.AddHostedService<CallCleanupService>();
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend",
-        policy =>
-        {
-            policy.WithOrigins("https://localhost:5173")
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials()
-                .SetIsOriginAllowed(_ => true); // Required for SignalR
-        });
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("https://thrume-frontend.onrender.com") // Your frontend's public URL
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials()
+            .SetIsOriginAllowed(_ => true);
+    });
 });
+
 
 // builder.Services.AddAntiforgery(options =>
 // {
@@ -158,7 +158,8 @@ authGroup.MapPost("/logout", async (SignInManager<Account> signInManager, HttpCo
 
     return Results.Ok(); 
 });
-
+app.UseCors();
+app.UseRouting(); 
 app.MapGroup("/api/auth").MapIdentityApi<Account>();
 app.MapGet("/api/auth/status", (ClaimsPrincipal claims) => 
     claims.Identity?.IsAuthenticated == true 
@@ -195,7 +196,7 @@ app.MapAccountEndpoints();
 app.MapCommentEndpoints();
 app.MapMessageEndpoints();
 app.MapAdminEndpoints();
-
+app.MapGet("/health", () => Results.Ok("Healthy"));
 // Map Call Controller
 app.MapControllers();
 app.MapHub<VoiceCallHub>("/voiceCallHub");

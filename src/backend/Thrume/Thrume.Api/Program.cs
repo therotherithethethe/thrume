@@ -158,8 +158,7 @@ authGroup.MapPost("/logout", async (SignInManager<Account> signInManager, HttpCo
 
     return Results.Ok(); 
 });
-app.UseCors();
-app.UseRouting(); 
+
 app.MapGroup("/api/auth").MapIdentityApi<Account>();
 app.MapGet("/api/auth/status", (ClaimsPrincipal claims) => 
     claims.Identity?.IsAuthenticated == true 

@@ -11,7 +11,7 @@ function getCookie(name: string) {
 
 const apiClient = axios.create({
     //baseURL: 'https://localhost:5133/api',
-    baseURL: '/',
+    baseURL: 'https://thrume-api.onrender.com',
     withCredentials: true,
     headers: {
         'Content-Type': 'application/json',

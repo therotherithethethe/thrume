@@ -103,10 +103,6 @@ const logout = async () => {
           <span>Register</span>
         </router-link>
         
-        <button v-if="isLoggedIn" @click="openCreatePostModal" class="nav-item logout-btn">
-          <PlusSquare :size="20" />
-          <span>Create Post</span>
-        </button>
         <button v-if="isLoggedIn" @click="logout" class="nav-item logout-btn">
           <LogOut :size="20" />
           <span>Logout</span>

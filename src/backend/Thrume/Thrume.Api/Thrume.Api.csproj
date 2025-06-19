@@ -36,7 +36,7 @@
         <Content Update="credentials.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
-
+        
         <!-- Use "Include" for the folder/contents, as the SDK might not grab it automatically -->
         <Content Include="token.json\**">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -47,6 +47,10 @@
       <Content Include="..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
+    </ItemGroup>
+    
+    <ItemGroup>
+      <Folder Include="token.json\" />
     </ItemGroup>
 
 </Project>
